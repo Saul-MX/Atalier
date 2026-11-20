@@ -1,5 +1,8 @@
-// Esquema de ATELIER. Los modelos se definen en la Fase 1 (ver ATELIER.md §5).
-// Las URLs de conexión están en prisma.config.ts (Prisma 7).
+// Esquema de ATELIER (ver ATELIER.md §5).
+// - Las URLs de conexión están en prisma.config.ts (Prisma 7).
+// - Los modelos de Better Auth (User, Session, Account, Verification) los
+//   genera su CLI (`pnpm auth:generate`); no se escriben a mano.
+// - Dinero SIEMPRE en centavos (Int).
 
 generator client {
   provider = "prisma-client"
@@ -8,4 +11,190 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+// ---------- E-commerce ----------
+
+enum OrderStatus {
+  PENDING // checkout creado, stock reservado, esperando pago
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  EXPIRED // el cliente no pagó a tiempo; stock liberado
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  name     String
+  slug     String    @unique
+  products Product[]
+}
+
+model Product {
+  id          String           @id @default(cuid())
+  name        String
+  slug        String           @unique
+  description String
+  basePrice   Int // centavos MXN
+  active      Boolean          @default(true)
+  categoryId  String
+  category    Category         @relation(fields: [categoryId], references: [id])
+  images      ProductImage[]
+  variants    ProductVariant[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([categoryId])
+  @@index([active, createdAt])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  url       String
+  publicId  String // id de Cloudinary, necesario para borrar
+  isMain    Boolean @default(false)
+  position  Int     @default(0)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, position])
+}
+
+model ProductVariant {
+  id         String      @id @default(cuid())
+  size       String // XS, S, M, L, XL o "Única"
+  color      String
+  colorHex   String?
+  stock      Int         @default(0) // CHECK (stock >= 0) en la migración
+  sku        String?     @unique
+  productId  String
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[] // @@unique evita variantes duplicadas
+
+  @@unique([productId, size, color])
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  userId          String? // null = compra como invitado
+  user            User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  email           String // siempre guardar el correo
+  status          OrderStatus @default(PENDING)
+  subtotal        Int // centavos
+  shippingCost    Int         @default(0)
+  total           Int // centavos
+  currency        String      @default("mxn")
+  stripeSessionId String?     @unique
+  paymentIntentId String?
+  paidAt          DateTime?
+  expiresAt       DateTime? // para PENDING (índice [status, expiresAt] para el cron)
+  shippingName    String?
+  shippingLine1   String?
+  shippingLine2   String?
+  shippingCity    String?
+  shippingState   String?
+  shippingZip     String?
+  shippingCountry String?
+  items           OrderItem[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([status, createdAt])
+  @@index([status, expiresAt])
+  @@index([userId])
+}
+
+model OrderItem {
+  id        String         @id @default(cuid())
+  orderId   String
+  order     Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variantId String
+  variant   ProductVariant @relation(fields: [variantId], references: [id])
+  name      String // copia del nombre al momento de la compra
+  quantity  Int
+  price     Int // centavos, copia del precio al momento de la compra
+
+  @@index([orderId])
+  @@index([variantId])
+}
+
+// Idempotencia de webhooks
+
+model StripeEvent {
+  id          String   @id // evt_...
+  type        String
+  processedAt DateTime @default(now())
+}
+
+// ---------- Better Auth (generado con `pnpm auth:generate`) ----------
+// No editar a mano salvo las relaciones con el e-commerce (User.orders).
+
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  role          String?
+  banned        Boolean?  @default(false)
+  banReason     String?
+  banExpires    DateTime?
+  sessions      Session[]
+  accounts      Account[]
+  orders        Order[] // relación añadida a mano tras `auth:generate`
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id             String   @id
+  expiresAt      DateTime
+  token          String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  ipAddress      String?
+  userAgent      String?
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  impersonatedBy String?
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
 }

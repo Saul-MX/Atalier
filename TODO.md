@@ -15,11 +15,12 @@ Plan por fases basado en la hoja de ruta de [ATELIER.md](ATELIER.md) §11. Cada 
 
 ## Fase 1 — Datos
 
-- [ ] Modelos de e-commerce según ATELIER.md §5 (Category, Product, ProductImage, ProductVariant, Order, OrderItem, StripeEvent, OrderStatus)
-- [ ] Config mínima de Better Auth + `npx @better-auth/cli generate` para user/session/account/verification (con campos del plugin admin) y relación `User.orders`
-- [ ] Primera migración contra Supabase
-- [ ] Seed: categorías, 12+ productos con variantes talla × color y stock, imágenes, usuario admin
-- [ ] Helpers de dinero (centavos ↔ MXN) con tests
+- [x] Modelos de e-commerce según ATELIER.md §5 (Category, Product, ProductImage, ProductVariant, Order, OrderItem, StripeEvent, OrderStatus)
+- [x] Config mínima de Better Auth + CLI oficial (`pnpm auth:generate`) para user/session/account/verification (con campos del plugin admin) y relación `User.orders`
+- [x] Primera migración contra Supabase (+ CHECK stock >= 0, importes ≥ 0, total = subtotal + envío)
+- [x] Script de seed: 6 categorías, 16 productos, variantes talla × color, imágenes provisionales, admin
+- [x] Seed ejecutado y verificado (idempotente; CHECK de stock comprobado)
+- [x] Helpers de dinero (centavos ↔ MXN) con tests
 
 ## Fase 2 — Tienda pública
 
@@ -70,5 +71,6 @@ Plan por fases basado en la hoja de ruta de [ATELIER.md](ATELIER.md) §11. Cada 
 
 ## Pendientes / decisiones abiertas
 
-- Credenciales de Supabase (necesarias en Fase 1), Google OAuth (Fase 3), Cloudinary (Fase 4), Stripe test (Fase 5)
+- Fotos reales de producto (hoy: SVG provisionales en public/seed/)
+- Google OAuth (Fase 3), Cloudinary (Fase 4), Stripe test (Fase 5)
 - BD para tests de integración de la Fase 5 (¿proyecto Supabase aparte o Postgres local con Docker?)

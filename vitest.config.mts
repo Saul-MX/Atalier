@@ -1,12 +1,12 @@
 import { fileURLToPath } from "node:url";
 
 import react from "@vitejs/plugin-react";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  plugins: [tsconfigPaths(), react()],
+  plugins: [react()],
   resolve: {
+    tsconfigPaths: true,
     alias: {
       // `server-only` lanza un error fuera del bundler de Next; en tests es un no-op.
       "server-only": fileURLToPath(

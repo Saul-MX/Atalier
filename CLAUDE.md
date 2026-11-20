@@ -32,10 +32,13 @@ pnpm db:generate      # prisma generate
 pnpm db:migrate       # prisma migrate dev
 pnpm db:seed          # seed de datos
 pnpm db:studio        # Prisma Studio
-pnpm auth:generate    # npx @better-auth/cli generate (tablas de Better Auth)
+pnpm auth:generate    # CLI oficial de Better Auth (paquete `auth`) → modelos en schema.prisma
+pnpm seed:images      # regenera las imágenes provisionales de public/seed/
 ```
 
-Checklist de cierre de cada fase: `pnpm lint && pnpm typecheck && pnpm test` en verde → commit Conventional Commits → resumen ≤ 5 líneas → **detenerse hasta recibir "continúa"**.
+Checklist de cierre de cada fase: `pnpm lint && pnpm typecheck && pnpm test` en verde → resumen ≤ 5 líneas → **mensaje de commit** (Conventional Commits) para que el usuario lo haga → **detenerse hasta recibir "continúa"**.
+
+**Claude nunca ejecuta `git commit` ni `git push`**: los commits los hace el usuario.
 
 ## Estructura de carpetas
 
@@ -44,7 +47,10 @@ prisma/
   schema.prisma         # modelos (Better Auth generado por CLI + e-commerce)
   migrations/
   seed.ts
-prisma.config.ts        # URLs de conexión (Prisma 7)
+  seed-data.ts          # catálogo de demo (precios en centavos, stock determinista)
+prisma.config.ts        # URLs de conexión (Prisma 7) y comando de seed
+auth.config.ts          # Better Auth para la CLI y el seed (sin server-only); la app NO lo importa
+scripts/                # utilidades de desarrollo (p. ej. generate-seed-images.ts)
 src/
   app/
     (shop)/             # tienda pública: home, catálogo, PDP, checkout, cuenta
@@ -59,6 +65,8 @@ src/
     shop/  admin/  shared/
   lib/                  # utilidades puras y clientes (prisma, stripe, cloudinary, auth)
     env/                # schema.ts (Zod), server.ts (secretos), public.ts (NEXT_PUBLIC_*)
+    auth/               # options.ts (compartido con la CLI), index.ts (instancia de la app)
+    money.ts            # centavos ↔ texto; única frontera de formateo
   server/               # lógica de dominio solo-servidor (import "server-only")
     services/           # checkout, orders, inventory…
     validators/         # esquemas Zod
@@ -80,7 +88,7 @@ Tests unitarios colocados junto al código: `*.test.ts(x)`.
 6. **Admin**: verificar rol con `requireAdmin()` **dentro de cada Route Handler y Server Action**. El proxy/middleware es solo una capa de redirección, nunca la única.
 7. **Zod** valida toda entrada de servidor (body, params, searchParams, formData).
 8. **Secretos solo en servidor**: nunca prefijo `NEXT_PUBLIC_` para secretos; módulos con secretos importan `"server-only"`. Nunca leer `process.env` directamente en la app: usar `serverEnv("KEY")` (`src/lib/env/server.ts`) o `publicEnv("KEY")` (`src/lib/env/public.ts`), validados con Zod por clave. Al añadir una variable: esquema en `src/lib/env/schema.ts` + `.env.example`.
-9. **Tablas de Better Auth**: se generan con `npx @better-auth/cli generate`. No escribirlas a mano.
+9. **Tablas de Better Auth**: se generan con `pnpm auth:generate` (CLI oficial `auth@<misma versión que better-auth>`; `@better-auth/cli` está deprecado). No escribirlas a mano. Las únicas ediciones manuales permitidas en esos modelos son relaciones con el e-commerce (`User.orders`); la CLI las conserva. Cualquier opción que cambie el esquema (plugins, campos) va en `src/lib/auth/options.ts` para que app y CLI coincidan.
 10. **Accesibilidad**: HTML semántico, foco visible, `label` en cada control, contraste AA, navegación por teclado completa.
 11. **Estados de UI**: todo componente que cargue datos tiene estado de carga (skeleton), vacío y error (y "agotado" donde aplique).
 
@@ -88,10 +96,12 @@ Tests unitarios colocados junto al código: `*.test.ts(x)`.
 
 - Server Components por defecto; `"use client"` solo cuando haga falta interactividad.
 - Mutaciones: Server Actions para formularios del admin; Route Handlers para endpoints públicos/webhooks.
-- Un solo `PrismaClient` compartido en `src/lib/prisma.ts`.
+- Un solo `PrismaClient` compartido en `src/lib/prisma.ts` (la app). Scripts fuera de Next (seed, CLI) usan el de `auth.config.ts`.
+- Imágenes del seed: `publicId` con prefijo `seed/` y URL local `/seed/*.svg`; no son recursos de Cloudinary (no borrarlas allí).
+- Borrar un producto con pedidos no es posible (`OrderItem → ProductVariant` sin cascada): desactivarlo (`active = false`).
 - Imports con alias `@/` → `src/`.
 - Nombres: componentes `PascalCase.tsx`, utilidades `kebab-case.ts`.
 - Sin `any`; preferir tipos inferidos de Prisma y Zod (`z.infer`).
-- Commits: Conventional Commits (`feat:`, `fix:`, `chore:`, `test:`, `docs:`, `refactor:`), uno por fase como mínimo.
+- Commits: Conventional Commits (`feat:`, `fix:`, `chore:`, `test:`, `docs:`, `refactor:`), uno por fase como mínimo. Claude propone el mensaje; el usuario hace el commit.
 - **Nunca** commitear `.env*` (salvo `.env.example`). No inventar claves: si falta una credencial o decisión, preguntar.
 - Idioma: UI y documentación en español; código (identificadores) en inglés.
