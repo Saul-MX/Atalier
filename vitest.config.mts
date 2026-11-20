@@ -18,6 +18,8 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.test.{ts,tsx}", "tests/**/*.test.{ts,tsx}"],
+    // Necesitan Postgres en Docker: `pnpm test:integration`.
+    exclude: ["tests/integration/**", "**/node_modules/**"],
     restoreMocks: true,
     unstubEnvs: true,
   },

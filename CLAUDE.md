@@ -27,6 +27,8 @@ pnpm build            # build de producción
 pnpm lint             # ESLint
 pnpm typecheck        # tsc --noEmit
 pnpm test             # Vitest (una pasada)
+pnpm db:test:up       # Postgres de tests en Docker (puerto 54329, en memoria)
+pnpm test:integration # tests contra Postgres real (concurrencia de stock, webhook, cron)
 pnpm format           # Prettier --write
 pnpm db:generate      # prisma generate
 pnpm db:migrate       # prisma migrate dev

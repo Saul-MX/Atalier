@@ -52,16 +52,18 @@ Plan por fases basado en la hoja de ruta de [ATELIER.md](ATELIER.md) §11. Cada 
 
 ## Fase 5 — Pagos y stock
 
-- [ ] `POST /api/checkout`: Zod, relectura de precios, reserva condicional en transacción, 409, Order PENDING
-- [ ] Stripe Checkout Session (`metadata.orderId`, `expires_at` ≥ 30 min, `shipping_address_collection`, envío)
-- [ ] Liberación de stock si falla Stripe (`CANCELLED`)
-- [ ] `/api/stripe/webhook`: `req.text()`, firma, idempotencia `StripeEvent`, `completed` → PAID, `expired` → EXPIRED + stock
-- [ ] `/api/cron/expire-orders` + `vercel.json` (cada 15 min, `CRON_SECRET`)
-- [ ] `/checkout/success` (solo lectura) y `/checkout/cancel`
-- [ ] Conectar el botón "Pagar" del CartDrawer (hoy deshabilitado) y vaciar el carrito tras pago confirmado
-- [ ] Revalidar `CATALOG_TAG` cuando el checkout/webhook cambie stock
-- [ ] Test: stock = 1, 20 peticiones simultáneas → 1 éxito, 19 × 409, stock final 0
-- [ ] Test: mismo evento de webhook procesado dos veces → sin efectos duplicados
+- [x] `POST /api/checkout`: Zod, relectura de precios, reserva condicional en transacción (filas en orden por id), 409 con stock disponible, Order PENDING
+- [x] Stripe Checkout Session (`metadata.orderId`, `expires_at` 31 min, `shipping_address_collection` MX, envío como `shipping_options`, solo tarjeta, idempotency key)
+- [x] Liberación de stock si falla Stripe (`CANCELLED`)
+- [x] `/api/stripe/webhook`: `req.text()`, firma, idempotencia `StripeEvent` en la misma transacción, `completed`+paid → PAID, `expired` → EXPIRED + stock
+- [x] `/api/cron/expire-orders` + `vercel.json` (cada 15 min, `CRON_SECRET`); expira la sesión en Stripe antes de liberar
+- [x] `/checkout/success` (solo lectura, se refresca hasta PAID) y `/checkout/cancel`
+- [x] Botón "Pagar" del CartDrawer conectado; ajusta el carrito al stock real en 409; vacía el carrito al confirmarse el pago
+- [x] Revalidar `CATALOG_TAG` cuando el checkout/webhook/cron cambian stock
+- [x] Tests escritos: 20 peticiones simultáneas (1 éxito, 19 × 409, stock 0) y webhook duplicado (secuencial y concurrente) — `tests/integration/`
+- [x] Smoke test con la API real de Stripe: checkout → sesión → cron expira y libera (11/11)
+- [x] `pnpm test:integration` en Docker: 17/17 (y verificado que el test de concurrencia falla si se quita la condición `stock >= qty`)
+- [x] E2E con tarjeta 4242 y webhooks reales (`stripe listen --api-key`): PAID, stock, carrito vaciado, cancelación y expiración (19/19)
 
 ## Fase 6 — Pedidos y métricas
 
@@ -81,4 +83,7 @@ Plan por fases basado en la hoja de ruta de [ATELIER.md](ATELIER.md) §11. Cada 
 
 - Fotos reales: las sube el usuario desde el admin (Fase 4); hasta entonces, SVG provisionales en public/seed/
 - Cloudinary (Fase 4), Stripe test (Fase 5)
-- BD para tests de integración de la Fase 5 (¿proyecto Supabase aparte o Postgres local con Docker?)
+- BD para tests de integración: Postgres local con Docker (docker-compose.yml, puerto 54329)
+- Stripe: la clave es de un **sandbox**; `stripe listen` debe usar `--api-key <sk_test del sandbox>` o no recibe eventos (el `stripe login` apunta a otra cuenta)
+- Vercel Hobby solo permite crons diarios: el webhook es el mecanismo principal; el cron cada 15 min requiere plan Pro
+- Pedidos de invitado: `Order.email` queda vacío hasta que el webhook guarda el correo de Stripe

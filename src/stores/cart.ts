@@ -34,6 +34,8 @@ type CartState = {
   addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => AddResult;
   setQuantity: (variantId: string, quantity: number) => void;
   removeItem: (variantId: string) => void;
+  /** Ajusta cantidades al stock real que informó el servidor (409). */
+  limitToStock: (limits: { variantId: string; available: number }[]) => void;
   clear: () => void;
   open: () => void;
   close: () => void;
@@ -88,6 +90,25 @@ export const useCartStore = create<CartState>()(
         set((state) => ({
           items: state.items.filter((i) => i.variantId !== variantId),
         })),
+
+      limitToStock: (limits) => {
+        const available = new Map(
+          limits.map((l) => [l.variantId, Math.max(0, l.available)]),
+        );
+        set((state) => ({
+          items: state.items
+            .map((i) => {
+              const max = available.get(i.variantId);
+              if (max === undefined) return i;
+              return {
+                ...i,
+                maxQuantity: max,
+                quantity: clamp(i.quantity, max),
+              };
+            })
+            .filter((i) => i.quantity > 0),
+        }));
+      },
 
       clear: () => set({ items: [] }),
       open: () => set({ isOpen: true }),

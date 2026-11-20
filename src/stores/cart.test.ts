@@ -23,6 +23,24 @@ describe("carrito", () => {
     useCartStore.setState({ items: [], isOpen: false, hasHydrated: true });
   });
 
+  it("se ajusta al stock real que informa el servidor (409)", () => {
+    const { addItem, limitToStock } = useCartStore.getState();
+    addItem(item(), 3);
+    addItem(item({ variantId: "var-2", size: "L" }), 2);
+    addItem(item({ variantId: "var-3", size: "S" }), 1);
+
+    limitToStock([
+      { variantId: "var-1", available: 1 },
+      { variantId: "var-2", available: 0 },
+    ]);
+
+    const { items } = useCartStore.getState();
+    expect(items.map((i) => [i.variantId, i.quantity, i.maxQuantity])).toEqual([
+      ["var-1", 1, 1],
+      ["var-3", 1, 3],
+    ]);
+  });
+
   it("añade artículos y agrupa la misma variante", () => {
     const { addItem } = useCartStore.getState();
     expect(addItem(item())).toBe("added");

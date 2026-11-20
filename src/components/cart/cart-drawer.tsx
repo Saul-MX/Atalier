@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cartCount, cartSubtotal, useCartStore } from "@/stores/cart";
 
 import { CartLineItem } from "./cart-line-item";
+import { CheckoutButton } from "./checkout-button";
 import { FreeShippingBar } from "./free-shipping-bar";
 
 export function CartDrawer() {
@@ -95,23 +96,9 @@ export function CartDrawer() {
                 </dd>
               </dl>
               <p className="text-xs text-muted-foreground">
-                IVA incluido. El envío se calcula al pagar.
+                IVA incluido. El envío se suma al pagar (gratis desde $1,500).
               </p>
-              {/* El checkout con Stripe se conecta en la Fase 5. */}
-              <Button
-                size="lg"
-                className="h-11 w-full"
-                disabled
-                aria-describedby="checkout-soon"
-              >
-                Pagar
-              </Button>
-              <p
-                id="checkout-soon"
-                className="text-center text-xs text-muted-foreground"
-              >
-                El pago estará disponible próximamente.
-              </p>
+              <CheckoutButton />
             </SheetFooter>
           </>
         )}
