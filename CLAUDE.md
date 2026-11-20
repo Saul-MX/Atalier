@@ -69,14 +69,16 @@ src/
     shared/             # Container, Price, EmptyState, ErrorState
     admin/
   lib/                  # utilidades puras y clientes (prisma, stripe, cloudinary, auth)
+    cloudinary.ts       # firma de subida, verificación de respuesta, borrado (server-only)
     env/                # schema.ts (Zod), server.ts (secretos), public.ts (NEXT_PUBLIC_*)
     auth/               # options.ts (CLI+app), index.ts (servidor), client.ts (navegador), roles.ts (puro), schemas.ts
     safe-redirect.ts    # valida ?next= (anti open-redirect)
     money.ts            # centavos ↔ texto; única frontera de formateo
   server/               # lógica de dominio solo-servidor (import "server-only")
     catalog/queries.ts  # lecturas públicas con "use cache" + cacheTag(CATALOG_TAG)
+    catalog/invalidate.ts # updateTag tras mutaciones del admin (solo Server Actions)
     auth/guards.ts      # getSession, requireUser/requireAdmin, withAdmin (Route Handlers), *Page (páginas), toActionError
-    services/           # checkout, orders, inventory…
+    services/           # admin-products (CRUD, fotos, variantes), checkout, orders…
     validators/         # esquemas Zod
   stores/               # Zustand (carrito)
   generated/prisma/     # cliente Prisma generado (gitignored)

@@ -12,7 +12,13 @@ export const serverEnvSchema = {
   BETTER_AUTH_URL: z.url(),
   GOOGLE_CLIENT_ID: z.string().min(1),
   GOOGLE_CLIENT_SECRET: z.string().min(1),
-  CLOUDINARY_CLOUD_NAME: z.string().min(1),
+  /** Solo el nombre del cloud (p. ej. "dxyz123"), no la URL cloudinary://… */
+  CLOUDINARY_CLOUD_NAME: z
+    .string()
+    .regex(
+      /^[a-z0-9_-]+$/i,
+      "Usa solo el nombre del cloud, no la URL cloudinary://…",
+    ),
   CLOUDINARY_API_KEY: z.string().min(1),
   CLOUDINARY_API_SECRET: z.string().min(1),
   /** Solo se aceptan claves de modo test. */

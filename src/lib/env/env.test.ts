@@ -39,6 +39,15 @@ describe("serverEnv", () => {
     expect(() => serverEnv("STRIPE_SECRET_KEY")).toThrow(/modo test/);
   });
 
+  it("rechaza la URL cloudinary:// en lugar del nombre del cloud", async () => {
+    vi.stubEnv("CLOUDINARY_CLOUD_NAME", "cloudinary://123:abc@demo");
+    const { serverEnv } = await loadEnvModules();
+
+    expect(() => serverEnv("CLOUDINARY_CLOUD_NAME")).toThrow(
+      /nombre del cloud/,
+    );
+  });
+
   it("valida solo la variable solicitada (las demás pueden faltar)", async () => {
     vi.stubEnv("STRIPE_SECRET_KEY", "sk_test_123");
     const { serverEnv } = await loadEnvModules();

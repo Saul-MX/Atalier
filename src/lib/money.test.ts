@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { formatPrice, isCents, lineTotal, parsePriceToCents } from "./money";
+import {
+  centsToInput,
+  formatPrice,
+  isCents,
+  lineTotal,
+  parsePriceToCents,
+} from "./money";
 
 describe("formatPrice", () => {
   it("formatea centavos como pesos mexicanos", () => {
@@ -59,5 +65,17 @@ describe("isCents", () => {
     expect(isCents(1.5)).toBe(false);
     expect(isCents(-1)).toBe(false);
     expect(isCents("100")).toBe(false);
+  });
+});
+
+describe("centsToInput", () => {
+  it.each([
+    [0, "0.00"],
+    [5, "0.05"],
+    [129950, "1299.50"],
+    [489900, "4899.00"],
+  ])("%d → %j y vuelta", (cents, text) => {
+    expect(centsToInput(cents)).toBe(text);
+    expect(parsePriceToCents(text)).toBe(cents);
   });
 });

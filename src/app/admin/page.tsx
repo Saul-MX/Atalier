@@ -1,8 +1,8 @@
-import { LayoutDashboardIcon } from "lucide-react";
+import { ArrowRightIcon, PackageIcon } from "lucide-react";
 import { type Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 
-import { EmptyState } from "@/components/shared/empty-state";
 import { requireAdminPage } from "@/server/auth/guards";
 
 export const metadata: Metadata = { title: "Panel" };
@@ -29,12 +29,30 @@ async function AdminHome() {
           Panel de administración de ATELIER.
         </p>
       </header>
-      {/* Catálogo (Fase 4), pedidos y métricas (Fase 6). */}
-      <EmptyState
-        icon={LayoutDashboardIcon}
-        title="El panel está en construcción"
-        description="Aquí podrás gestionar productos, inventario y pedidos."
-      />
+      {/* Pedidos y métricas llegan en la Fase 6. */}
+      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <li>
+          <Link
+            href="/admin/productos"
+            className="group flex h-full flex-col gap-3 rounded-lg border p-5 transition-colors hover:bg-muted/50"
+          >
+            <PackageIcon
+              className="size-6 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <span className="flex items-center gap-1 font-medium">
+              Productos
+              <ArrowRightIcon
+                className="size-4 transition-transform group-hover:translate-x-0.5"
+                aria-hidden="true"
+              />
+            </span>
+            <span className="text-sm text-muted-foreground">
+              Catálogo, fotos, variantes y stock.
+            </span>
+          </Link>
+        </li>
+      </ul>
     </div>
   );
 }

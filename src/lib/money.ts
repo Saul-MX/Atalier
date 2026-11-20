@@ -47,6 +47,13 @@ export function parsePriceToCents(input: string): number | null {
   return isCents(cents) ? cents : null;
 }
 
+/** 129950 → "1299.50": valor editable para un input (inverso de parsePriceToCents). */
+export function centsToInput(cents: number): string {
+  assertCents(cents);
+  const pesos = Math.floor(cents / 100);
+  return `${pesos}.${String(cents % 100).padStart(2, "0")}`;
+}
+
 /** Suma segura de líneas: precio unitario (centavos) × cantidad. */
 export function lineTotal(unitCents: number, quantity: number): number {
   assertCents(unitCents);

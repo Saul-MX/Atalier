@@ -42,12 +42,13 @@ Plan por fases basado en la hoja de ruta de [ATELIER.md](ATELIER.md) §11. Cada 
 
 ## Fase 4 — Admin: catálogo
 
-- [ ] Layout de admin protegido
-- [ ] CRUD de productos (Server Actions + Zod + `requireAdmin()`)
-- [ ] Subida firmada a Cloudinary con drag-and-drop; borrado del recurso al eliminar
-- [ ] Al subir la primera foto real de un producto, retirar sus placeholders `seed/` (que nunca se borran en Cloudinary)
-- [ ] Matriz de variantes talla × color con stock
-- [ ] Tras cada mutación del catálogo: `revalidateTag(CATALOG_TAG)` / `productTag(slug)` (src/server/catalog/queries.ts)
+- [x] Layout de admin protegido + navegación (Panel, Productos)
+- [x] CRUD de productos (Server Actions + Zod + `requireAdmin()`); con pedidos no se borra, se desactiva
+- [x] Subida firmada a Cloudinary con drag-and-drop (carpeta por producto, firma de respuesta verificada en servidor); borrado del recurso al eliminar foto o producto
+- [x] Al subir la primera foto real de un producto, retirar sus placeholders `seed/` (que nunca se borran en Cloudinary)
+- [x] Matriz de variantes talla × color con stock (escritura condicional: no pisa reservas hechas mientras se edita)
+- [x] Tras cada mutación del catálogo: `updateTag(CATALOG_TAG)` / `productTag(slug)` (src/server/catalog/invalidate.ts)
+- [x] Verificación E2E contra servidor real + Cloudinary (31 comprobaciones)
 
 ## Fase 5 — Pagos y stock
 

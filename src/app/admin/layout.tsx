@@ -4,6 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
+import { AdminNav } from "@/components/admin/admin-nav";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
@@ -38,12 +39,18 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
           <span className="rounded-sm bg-primary px-1.5 py-0.5 text-xs font-medium text-primary-foreground">
             Admin
           </span>
+          <div className="hidden sm:block">
+            <AdminNav />
+          </div>
           <Link
             href="/"
             className="ml-auto text-sm text-muted-foreground hover:text-foreground"
           >
             Ver tienda
           </Link>
+        </div>
+        <div className="mx-auto w-full max-w-7xl px-2 pb-2 sm:hidden">
+          <AdminNav />
         </div>
       </header>
       <main

@@ -37,17 +37,7 @@ export const signUpSchema = z
     path: ["confirmPassword"],
   });
 
-export type FieldErrors = Partial<Record<string, string>>;
-
-/** Primer mensaje de error por campo, listo para pintar en el formulario. */
-export function fieldErrors(error: z.ZodError): FieldErrors {
-  const result: FieldErrors = {};
-  for (const issue of error.issues) {
-    const key = String(issue.path[0] ?? "form");
-    result[key] ??= issue.message;
-  }
-  return result;
-}
+export { type FieldErrors, fieldErrors } from "@/lib/validation";
 
 /** Traduce los códigos de error de Better Auth a mensajes para el usuario. */
 export function authErrorMessage(error: {
