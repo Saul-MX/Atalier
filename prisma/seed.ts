@@ -69,18 +69,24 @@ async function seedProducts(categoryIds: Map<string, string>) {
           update: fields,
         });
 
+        // Las imágenes provisionales (publicId "seed/…") solo se usan mientras
+        // el producto no tenga fotos reales subidas desde el admin.
         await tx.productImage.deleteMany({
           where: { productId, publicId: { startsWith: "seed/" } },
         });
-        await tx.productImage.createMany({
-          data: product.colors.map((_, position) => ({
-            productId,
-            url: seedImagePath(product.slug, position),
-            publicId: seedImagePublicId(product.slug, position),
-            isMain: position === 0,
-            position,
-          })),
+        const realImages = await tx.productImage.count({
+          where: { productId },
         });
+        if (realImages === 0)
+          await tx.productImage.createMany({
+            data: product.colors.map((_, position) => ({
+              productId,
+              url: seedImagePath(product.slug, position),
+              publicId: seedImagePublicId(product.slug, position),
+              isMain: position === 0,
+              position,
+            })),
+          });
 
         for (const color of product.colors) {
           for (const size of product.sizes) {

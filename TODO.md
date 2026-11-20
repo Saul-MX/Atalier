@@ -24,12 +24,12 @@ Plan por fases basado en la hoja de ruta de [ATELIER.md](ATELIER.md) §11. Cada 
 
 ## Fase 2 — Tienda pública
 
-- [ ] Layout, header, footer, navegación accesible
-- [ ] Home editorial (hero, colecciones, novedades)
-- [ ] Catálogo con filtros en `searchParams` (categoría, precio, color, talla) + búsqueda con debounce
-- [ ] PDP: galería con zoom, selector de variantes dependiente, guía de tallas en modal
-- [ ] Carrito en drawer (Zustand + localStorage), subtotal, barra de envío gratis
-- [ ] Estados de carga / vacío / error / agotado
+- [x] Layout, header, footer, navegación accesible
+- [x] Home editorial (hero, colecciones, novedades)
+- [x] Catálogo con filtros en `searchParams` (categoría, precio, color, talla) + búsqueda con debounce
+- [x] PDP: galería con zoom, selector de variantes dependiente, guía de tallas en modal
+- [x] Carrito en drawer (Zustand + localStorage), subtotal, barra de envío gratis
+- [x] Estados de carga / vacío / error / agotado
 
 ## Fase 3 — Autenticación
 
@@ -43,7 +43,9 @@ Plan por fases basado en la hoja de ruta de [ATELIER.md](ATELIER.md) §11. Cada 
 - [ ] Layout de admin protegido
 - [ ] CRUD de productos (Server Actions + Zod + `requireAdmin()`)
 - [ ] Subida firmada a Cloudinary con drag-and-drop; borrado del recurso al eliminar
+- [ ] Al subir la primera foto real de un producto, retirar sus placeholders `seed/` (que nunca se borran en Cloudinary)
 - [ ] Matriz de variantes talla × color con stock
+- [ ] Tras cada mutación del catálogo: `revalidateTag(CATALOG_TAG)` / `productTag(slug)` (src/server/catalog/queries.ts)
 
 ## Fase 5 — Pagos y stock
 
@@ -53,6 +55,8 @@ Plan por fases basado en la hoja de ruta de [ATELIER.md](ATELIER.md) §11. Cada 
 - [ ] `/api/stripe/webhook`: `req.text()`, firma, idempotencia `StripeEvent`, `completed` → PAID, `expired` → EXPIRED + stock
 - [ ] `/api/cron/expire-orders` + `vercel.json` (cada 15 min, `CRON_SECRET`)
 - [ ] `/checkout/success` (solo lectura) y `/checkout/cancel`
+- [ ] Conectar el botón "Pagar" del CartDrawer (hoy deshabilitado) y vaciar el carrito tras pago confirmado
+- [ ] Revalidar `CATALOG_TAG` cuando el checkout/webhook cambie stock
 - [ ] Test: stock = 1, 20 peticiones simultáneas → 1 éxito, 19 × 409, stock final 0
 - [ ] Test: mismo evento de webhook procesado dos veces → sin efectos duplicados
 
@@ -65,12 +69,13 @@ Plan por fases basado en la hoja de ruta de [ATELIER.md](ATELIER.md) §11. Cada 
 ## Fase 7 — Pulido y publicación
 
 - [ ] SEO: metadata dinámica, Open Graph, `sitemap.ts`, `robots.ts`
+- [ ] PDP inexistente responde 200 + noindex (notFound dentro de Suspense); valorar 404 real
 - [ ] Rendimiento (`next/image`, caché) y Lighthouse ≥ 90
 - [ ] Auditoría de accesibilidad
 - [ ] README: decisiones técnicas, diagramas, credenciales de prueba, tarjeta 4242, guía local y de Vercel
 
 ## Pendientes / decisiones abiertas
 
-- Fotos reales de producto (hoy: SVG provisionales en public/seed/)
+- Fotos reales: las sube el usuario desde el admin (Fase 4); hasta entonces, SVG provisionales en public/seed/
 - Google OAuth (Fase 3), Cloudinary (Fase 4), Stripe test (Fase 5)
 - BD para tests de integración de la Fase 5 (¿proyecto Supabase aparte o Postgres local con Docker?)

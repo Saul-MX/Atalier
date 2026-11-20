@@ -62,12 +62,18 @@ src/
       cron/expire-orders/
   components/
     ui/                 # shadcn/ui (generado, no editar a mano salvo tokens)
-    shop/  admin/  shared/
+    shop/               # header, footer, tarjetas, búsqueda
+    catalog/            # filtros, orden, paginación (estado en la URL)
+    product/            # galería, selector de variantes, guía de tallas
+    cart/               # drawer, líneas, barra de envío gratis, hidratación
+    shared/             # Container, Price, EmptyState, ErrorState
+    admin/
   lib/                  # utilidades puras y clientes (prisma, stripe, cloudinary, auth)
     env/                # schema.ts (Zod), server.ts (secretos), public.ts (NEXT_PUBLIC_*)
     auth/               # options.ts (compartido con la CLI), index.ts (instancia de la app)
     money.ts            # centavos ↔ texto; única frontera de formateo
   server/               # lógica de dominio solo-servidor (import "server-only")
+    catalog/queries.ts  # lecturas públicas con "use cache" + cacheTag(CATALOG_TAG)
     services/           # checkout, orders, inventory…
     validators/         # esquemas Zod
   stores/               # Zustand (carrito)
@@ -95,6 +101,10 @@ Tests unitarios colocados junto al código: `*.test.ts(x)`.
 ## Convenciones
 
 - Server Components por defecto; `"use client"` solo cuando haga falta interactividad.
+- **Cache Components (Next 16)**: `searchParams`, `params`, `cookies()` y lecturas sin cachear van dentro de `<Suspense>`; lecturas públicas con `"use cache"` + `cacheLife` + `cacheTag`. `pnpm build` valida estas reglas: ejecútalo cuando toques páginas.
+- `error.tsx` recibe `{ error, retry }` (no `reset`). En `next/image` usar `preload` (no `priority`).
+- Filtros del catálogo: única fuente de verdad en `src/lib/catalog/filters.ts` (parse/serialize de la URL).
+- Carrito: `skipHydration` + `CartHydrator`; los precios del carrito son solo informativos.
 - Mutaciones: Server Actions para formularios del admin; Route Handlers para endpoints públicos/webhooks.
 - Un solo `PrismaClient` compartido en `src/lib/prisma.ts` (la app). Scripts fuera de Next (seed, CLI) usan el de `auth.config.ts`.
 - Imágenes del seed: `publicId` con prefijo `seed/` y URL local `/seed/*.svg`; no son recursos de Cloudinary (no borrarlas allí).
