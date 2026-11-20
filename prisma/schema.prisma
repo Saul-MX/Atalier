@@ -1,0 +1,11 @@
+// Esquema de ATELIER. Los modelos se definen en la Fase 1 (ver ATELIER.md §5).
+// Las URLs de conexión están en prisma.config.ts (Prisma 7).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
