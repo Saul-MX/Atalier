@@ -2,6 +2,7 @@ import "server-only";
 
 import { type OrderStatus, type Prisma } from "@/generated/prisma/client";
 import { CHECKOUT_TTL_MINUTES, orderTotals } from "@/lib/checkout/totals";
+import { SOLD_STATUSES } from "@/lib/orders/status";
 import { prisma } from "@/lib/prisma";
 import { type CheckoutLine } from "@/server/validators/checkout";
 
@@ -309,3 +310,39 @@ export function getOrderBySession(
     },
   });
 }
+
+// ─── Cliente ────────────────────────────────────────────────────────────────
+
+/** Historial del cliente: solo pedidos pagados (no checkouts abandonados). */
+export function listCustomerOrders(userId: string) {
+  return prisma.order.findMany({
+    where: { userId, status: { in: [...SOLD_STATUSES] } },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+    select: {
+      id: true,
+      status: true,
+      createdAt: true,
+      paidAt: true,
+      shippedAt: true,
+      deliveredAt: true,
+      subtotal: true,
+      shippingCost: true,
+      total: true,
+      items: {
+        orderBy: { id: "asc" },
+        select: {
+          id: true,
+          name: true,
+          quantity: true,
+          price: true,
+          variant: { select: { product: { select: { slug: true } } } },
+        },
+      },
+    },
+  });
+}
+
+export type CustomerOrder = Awaited<
+  ReturnType<typeof listCustomerOrders>
+>[number];

@@ -19,6 +19,7 @@ import { Price } from "@/components/shared/price";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { lineTotal } from "@/lib/money";
+import { orderNumber } from "@/lib/orders/status";
 import { getOrderBySession, type OrderSummary } from "@/server/services/orders";
 
 export const metadata: Metadata = {
@@ -124,7 +125,7 @@ function PaidOrder({ order }: { order: OrderSummary }) {
           ¡Gracias por tu compra!
         </h1>
         <p className="text-sm text-muted-foreground">
-          Pedido <span className="font-mono">{order.id}</span>
+          Pedido <span className="font-mono">{orderNumber(order.id)}</span>
           {order.email && (
             <>
               {" "}

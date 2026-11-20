@@ -80,7 +80,7 @@ src/
     catalog/queries.ts  # lecturas públicas con "use cache" + cacheTag(CATALOG_TAG)
     catalog/invalidate.ts # updateTag tras mutaciones del admin (solo Server Actions)
     auth/guards.ts      # getSession, requireUser/requireAdmin, withAdmin (Route Handlers), *Page (páginas), toActionError
-    services/           # admin-products (CRUD, fotos, variantes), checkout, orders…
+    services/           # admin-products, admin-orders (pedidos + métricas), checkout (Stripe), orders (reserva/stock, historial)
     validators/         # esquemas Zod
   stores/               # Zustand (carrito)
   generated/prisma/     # cliente Prisma generado (gitignored)

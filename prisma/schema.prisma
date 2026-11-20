@@ -88,6 +88,8 @@ model Order {
   stripeSessionId String?     @unique
   paymentIntentId String?
   paidAt          DateTime?
+  shippedAt       DateTime? // PAID → SHIPPED (admin)
+  deliveredAt     DateTime? // SHIPPED → DELIVERED (admin)
   expiresAt       DateTime? // para PENDING (índice [status, expiresAt] para el cron)
   shippingName    String?
   shippingLine1   String?

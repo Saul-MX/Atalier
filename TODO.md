@@ -67,9 +67,11 @@ Plan por fases basado en la hoja de ruta de [ATELIER.md](ATELIER.md) §11. Cada 
 
 ## Fase 6 — Pedidos y métricas
 
-- [ ] Admin: tabla de pedidos con filtro por estado, detalle, transición PAID → SHIPPED → DELIVERED
-- [ ] Dashboard: ingresos, pendientes, stock bajo, gráfica de ventas 30 días
-- [ ] Mi cuenta: historial de pedidos del cliente
+- [x] Admin: tabla de pedidos con pestañas por estado (con conteos), búsqueda por correo/nombre/número y paginación
+- [x] Detalle de pedido (artículos, cliente, dirección, historial) y transición PAID → SHIPPED → DELIVERED con confirmación; condicional sobre el estado visto (dos admins a la vez → conflicto) y fechas `shippedAt`/`deliveredAt` (migración)
+- [x] Dashboard: KPIs (ingresos 30 días vs anteriores, pedidos, ticket medio, por enviar), stock bajo, checkouts en curso, gráfica de ventas diarias 30 días (SVG accesible: teclado, tooltip, tabla; días en hora de CDMX)
+- [x] Mi cuenta: historial de pedidos pagados del cliente con estado y seguimiento (solo los suyos)
+- [x] E2E en servidor real (21/21) y sin overflow a 375 px
 
 ## Fase 7 — Pulido y publicación
 

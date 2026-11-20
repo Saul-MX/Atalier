@@ -1,15 +1,15 @@
-import { PackageIcon } from "lucide-react";
 import { type Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { CustomerOrders } from "@/components/orders/customer-orders";
 import { Container } from "@/components/shared/container";
-import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { isAdminRole } from "@/lib/auth/roles";
 import { requireUserPage } from "@/server/auth/guards";
+import { listCustomerOrders } from "@/server/services/orders";
 
 export const metadata: Metadata = {
   title: "Mi cuenta",
@@ -28,6 +28,8 @@ export default function AccountPage() {
 
 async function AccountContent() {
   const { user } = await requireUserPage("/cuenta");
+  // Solo los pedidos de ESTE usuario (filtro por userId en el servidor).
+  const orders = await listCustomerOrders(user.id);
 
   return (
     <div className="flex flex-col gap-10">
@@ -52,18 +54,7 @@ async function AccountContent() {
         <h2 id="pedidos" className="text-xl font-semibold tracking-tight">
           Mis pedidos
         </h2>
-        {/* El historial de pedidos se implementa en la Fase 6. */}
-        <EmptyState
-          icon={PackageIcon}
-          title="Aún no tienes pedidos"
-          description="Cuando completes una compra, podrás seguir su estado aquí."
-          headingLevel="h3"
-          action={
-            <Button asChild>
-              <Link href="/catalogo">Explorar el catálogo</Link>
-            </Button>
-          }
-        />
+        <CustomerOrders orders={orders} />
       </section>
     </div>
   );
