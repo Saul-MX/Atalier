@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { UserMenu } from "@/components/auth/user-menu";
 import { CartButton } from "@/components/cart/cart-button";
 import { Container } from "@/components/shared/container";
 import { catalogHref } from "@/lib/catalog/filters";
@@ -12,7 +13,7 @@ export async function SiteHeader() {
   const categories = await getCategories();
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">
+    <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur supports-backdrop-filter:bg-background/75">
       <Container className="flex h-16 items-center gap-2">
         <MobileNav categories={categories} />
 
@@ -49,6 +50,7 @@ export async function SiteHeader() {
 
         <div className="ml-auto flex items-center gap-1">
           <SearchDialog />
+          <UserMenu />
           <CartButton />
         </div>
       </Container>

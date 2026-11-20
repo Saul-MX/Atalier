@@ -70,10 +70,12 @@ src/
     admin/
   lib/                  # utilidades puras y clientes (prisma, stripe, cloudinary, auth)
     env/                # schema.ts (Zod), server.ts (secretos), public.ts (NEXT_PUBLIC_*)
-    auth/               # options.ts (compartido con la CLI), index.ts (instancia de la app)
+    auth/               # options.ts (CLI+app), index.ts (servidor), client.ts (navegador), roles.ts (puro), schemas.ts
+    safe-redirect.ts    # valida ?next= (anti open-redirect)
     money.ts            # centavos ↔ texto; única frontera de formateo
   server/               # lógica de dominio solo-servidor (import "server-only")
     catalog/queries.ts  # lecturas públicas con "use cache" + cacheTag(CATALOG_TAG)
+    auth/guards.ts      # getSession, requireUser/requireAdmin, withAdmin (Route Handlers), *Page (páginas), toActionError
     services/           # checkout, orders, inventory…
     validators/         # esquemas Zod
   stores/               # Zustand (carrito)
@@ -91,7 +93,7 @@ Tests unitarios colocados junto al código: `*.test.ts(x)`.
 3. **Liberación de stock**: webhook `checkout.session.expired` + Vercel Cron `/api/cron/expire-orders` (cada 15 min) protegido con `Authorization: Bearer ${CRON_SECRET}`.
 4. **Una orden pasa a `PAID` solo desde el webhook** y solo si `payment_status === "paid"`. Nunca desde `/checkout/success`.
 5. **Webhook**: `await req.text()` (body sin parsear) → `stripe.webhooks.constructEvent` → insertar `event.id` en `StripeEvent` (idempotencia); si ya existe, `200` sin hacer nada.
-6. **Admin**: verificar rol con `requireAdmin()` **dentro de cada Route Handler y Server Action**. El proxy/middleware es solo una capa de redirección, nunca la única.
+6. **Admin**: verificar rol **dentro de cada Route Handler y Server Action** (`withAdmin(handler)` o `await requireAdmin()` + `toActionError`) y en cada página (`requireAdminPage`). `src/proxy.ts` y el layout de `/admin` son solo UX, nunca la barrera. La sesión no se cachea entre peticiones (revocar rol/baneo surte efecto inmediato). Comprobar roles solo con `isAdminRole()` (roles separados por comas).
 7. **Zod** valida toda entrada de servidor (body, params, searchParams, formData).
 8. **Secretos solo en servidor**: nunca prefijo `NEXT_PUBLIC_` para secretos; módulos con secretos importan `"server-only"`. Nunca leer `process.env` directamente en la app: usar `serverEnv("KEY")` (`src/lib/env/server.ts`) o `publicEnv("KEY")` (`src/lib/env/public.ts`), validados con Zod por clave. Al añadir una variable: esquema en `src/lib/env/schema.ts` + `.env.example`.
 9. **Tablas de Better Auth**: se generan con `pnpm auth:generate` (CLI oficial `auth@<misma versión que better-auth>`; `@better-auth/cli` está deprecado). No escribirlas a mano. Las únicas ediciones manuales permitidas en esos modelos son relaciones con el e-commerce (`User.orders`); la CLI las conserva. Cualquier opción que cambie el esquema (plugins, campos) va en `src/lib/auth/options.ts` para que app y CLI coincidan.

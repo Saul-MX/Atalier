@@ -33,10 +33,12 @@ Plan por fases basado en la hoja de ruta de [ATELIER.md](ATELIER.md) §11. Cada 
 
 ## Fase 3 — Autenticación
 
-- [ ] Better Auth: credenciales + Google, plugin admin, handler `api/auth/[...all]`
-- [ ] Páginas de login/registro accesibles
-- [ ] `proxy.ts` (redirección rápida) + `requireAdmin()` / `requireUser()` en servidor
-- [ ] Tests de `requireAdmin()`
+- [x] Better Auth: credenciales + Google, plugin admin, handler `api/auth/[...all]`
+- [x] Páginas de login/registro accesibles + menú de usuario + /cuenta + /admin protegido
+- [x] `proxy.ts` (redirección rápida) + `requireAdmin()` / `requireUser()` en servidor
+- [x] Tests de `requireAdmin()`, `withAdmin`, proxy, safeRedirect, formularios
+- [x] Verificación E2E contra servidor real: registro, roles, 401/403 en API admin, set-role bloqueado, login admin, logout
+- [ ] Probar en navegador el login con Google (flujo OAuth completo)
 
 ## Fase 4 — Admin: catálogo
 
@@ -77,5 +79,5 @@ Plan por fases basado en la hoja de ruta de [ATELIER.md](ATELIER.md) §11. Cada 
 ## Pendientes / decisiones abiertas
 
 - Fotos reales: las sube el usuario desde el admin (Fase 4); hasta entonces, SVG provisionales en public/seed/
-- Google OAuth (Fase 3), Cloudinary (Fase 4), Stripe test (Fase 5)
+- Cloudinary (Fase 4), Stripe test (Fase 5)
 - BD para tests de integración de la Fase 5 (¿proyecto Supabase aparte o Postgres local con Docker?)

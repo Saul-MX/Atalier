@@ -1,6 +1,8 @@
 import { type BetterAuthOptions } from "better-auth";
 import { admin } from "better-auth/plugins";
 
+import { ADMIN_ROLE, USER_ROLE } from "./roles";
+
 /**
  * Opciones de Better Auth compartidas entre la app (`./index.ts`) y la CLI
  * (`/auth.config.ts`). Aquí NO se leen secretos ni se toca la BD: así la CLI
@@ -12,7 +14,7 @@ export const authOptions = {
     enabled: true,
     minPasswordLength: 8,
   },
-  plugins: [admin({ defaultRole: "user", adminRoles: ["admin"] })],
+  plugins: [admin({ defaultRole: USER_ROLE, adminRoles: [ADMIN_ROLE] })],
 } satisfies Partial<BetterAuthOptions>;
 
-export const ADMIN_ROLE = "admin";
+export { ADMIN_ROLE } from "./roles";
