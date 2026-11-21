@@ -1,4 +1,5 @@
 import { ArrowRightIcon, LockIcon, ReceiptIcon, TruckIcon } from "lucide-react";
+import { type Metadata } from "next";
 import Link from "next/link";
 
 import { Container } from "@/components/shared/container";
@@ -8,11 +9,34 @@ import { ProductImage } from "@/components/shop/product-image";
 import { Button } from "@/components/ui/button";
 import { catalogHref } from "@/lib/catalog/filters";
 import { formatPrice } from "@/lib/money";
+import { publicEnv } from "@/lib/env/public";
+import { jsonLd, SITE } from "@/lib/seo";
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
 import {
   getCategoryHighlights,
   getNewArrivals,
 } from "@/server/catalog/queries";
+
+export const metadata: Metadata = {
+  title: { absolute: SITE.title },
+  alternates: { canonical: "/" },
+};
+
+/** Datos estructurados del sitio: nombre y búsqueda interna (sitelinks searchbox). */
+function websiteJsonLd() {
+  const base = publicEnv("NEXT_PUBLIC_APP_URL");
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE.name,
+    url: new URL("/", base).toString(),
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${new URL("/catalogo", base).toString()}?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  };
+}
 
 export default async function HomePage() {
   const [newArrivals, collections] = await Promise.all([
@@ -23,6 +47,10 @@ export default async function HomePage() {
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(websiteJsonLd()) }}
+      />
       {/* Hero editorial */}
       <section aria-labelledby="hero-title" className="border-b">
         <Container className="grid items-center gap-10 py-12 md:grid-cols-2 md:py-20">
@@ -60,7 +88,7 @@ export default async function HomePage() {
                   src={heroA.images[0]}
                   alt=""
                   sizes="(min-width: 768px) 25vw, 50vw"
-                  preload
+                  priority
                 />
               </div>
               {heroB && (
@@ -69,7 +97,7 @@ export default async function HomePage() {
                     src={heroB.images[0]}
                     alt=""
                     sizes="(min-width: 768px) 25vw, 50vw"
-                    preload
+                    priority
                   />
                 </div>
               )}

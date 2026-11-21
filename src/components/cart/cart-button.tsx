@@ -5,6 +5,8 @@ import { ShoppingBagIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cartCount, useCartStore } from "@/stores/cart";
 
+import { CartDrawerLazy } from "./lazy-cart-drawer";
+
 export function CartButton() {
   const count = useCartStore((state) => cartCount(state.items));
   const hasHydrated = useCartStore((state) => state.hasHydrated);
@@ -22,6 +24,8 @@ export function CartButton() {
       size="icon-lg"
       className="relative"
       onClick={open}
+      onPointerEnter={CartDrawerLazy.preload}
+      onFocus={CartDrawerLazy.preload}
       aria-label={label}
       aria-haspopup="dialog"
     >

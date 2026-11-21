@@ -332,3 +332,18 @@ export async function searchProducts(
     image: row.images[0]?.url ?? null,
   }));
 }
+
+/** Productos activos con su fecha de modificación, para sitemap.xml. */
+export async function getSitemapProducts(): Promise<
+  { slug: string; updatedAt: Date }[]
+> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(CATALOG_TAG);
+
+  return prisma.product.findMany({
+    where: { active: true },
+    orderBy: { slug: "asc" },
+    select: { slug: true, updatedAt: true },
+  });
+}

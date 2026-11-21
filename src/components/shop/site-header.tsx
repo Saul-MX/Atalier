@@ -7,7 +7,7 @@ import { catalogHref } from "@/lib/catalog/filters";
 import { getCategories } from "@/server/catalog/queries";
 
 import { MobileNav } from "./mobile-nav";
-import { SearchDialog } from "./search-dialog";
+import { SearchLauncher } from "./search-launcher";
 
 export async function SiteHeader() {
   const categories = await getCategories();
@@ -49,7 +49,7 @@ export async function SiteHeader() {
         </nav>
 
         <div className="ml-auto flex items-center gap-1">
-          <SearchDialog />
+          <SearchLauncher />
           <UserMenu />
           <CartButton />
         </div>

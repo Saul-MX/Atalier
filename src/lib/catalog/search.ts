@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-export const SEARCH_MIN_LENGTH = 2;
+import { SEARCH_MIN_LENGTH } from "./search-config";
+
+export { SEARCH_MIN_LENGTH };
 
 /** Validación compartida del término de búsqueda predictiva. */
 export const searchQuerySchema = z.object({

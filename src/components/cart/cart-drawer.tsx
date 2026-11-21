@@ -15,7 +15,12 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cartCount, cartSubtotal, useCartStore } from "@/stores/cart";
+import {
+  cartCount,
+  cartSubtotal,
+  takeCartReturnFocus,
+  useCartStore,
+} from "@/stores/cart";
 
 import { CartLineItem } from "./cart-line-item";
 import { CheckoutButton } from "./checkout-button";
@@ -33,7 +38,17 @@ export function CartDrawer() {
 
   return (
     <Sheet open={isOpen} onOpenChange={setOpen}>
-      <SheetContent className="w-full gap-0 sm:max-w-md">
+      <SheetContent
+        className="w-full gap-0 sm:max-w-md"
+        // Sin SheetTrigger: el foco vuelve al elemento que abrió el carrito.
+        onCloseAutoFocus={(event) => {
+          const target = takeCartReturnFocus();
+          if (target) {
+            event.preventDefault();
+            target.focus();
+          }
+        }}
+      >
         <SheetHeader className="border-b">
           <SheetTitle>Tu carrito</SheetTitle>
           <SheetDescription>

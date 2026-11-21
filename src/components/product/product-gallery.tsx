@@ -51,7 +51,7 @@ export function ProductGallery({
           src={current.url}
           alt={alt(index)}
           sizes="(min-width: 1024px) 50vw, 100vw"
-          preload={index === 0}
+          priority={index === 0}
         />
         <Button
           variant="secondary"

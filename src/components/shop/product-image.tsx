@@ -9,7 +9,12 @@ type ProductImageProps = {
   alt: string;
   sizes: string;
   className?: string;
-  preload?: boolean;
+  /**
+   * Imagen candidata a LCP: se pide pronto (`loading="eager"`) y con prioridad
+   * alta (`fetchPriority="high"`). Next 16 recomienda esto frente a `preload`,
+   * que no marca la prioridad y compite si hay varias candidatas.
+   */
+  priority?: boolean;
 };
 
 /**
@@ -22,7 +27,7 @@ export function ProductImage({
   alt,
   sizes,
   className,
-  preload,
+  priority,
 }: ProductImageProps) {
   if (!src) {
     return (
@@ -46,7 +51,8 @@ export function ProductImage({
       alt={alt}
       fill
       sizes={sizes}
-      preload={preload}
+      loading={priority ? "eager" : undefined}
+      fetchPriority={priority ? "high" : undefined}
       className={cn("object-cover", className)}
     />
   );

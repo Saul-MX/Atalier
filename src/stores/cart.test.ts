@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { type CartItem, cartCount, cartSubtotal, useCartStore } from "./cart";
+import {
+  type CartItem,
+  cartCount,
+  cartSubtotal,
+  takeCartReturnFocus,
+  useCartStore,
+} from "./cart";
 
 const item = (
   overrides: Partial<Omit<CartItem, "quantity">> = {},
@@ -86,5 +92,27 @@ describe("carrito", () => {
       state: Record<string, unknown>;
     };
     expect(Object.keys(stored.state)).toEqual(["items"]);
+  });
+});
+
+describe("foco al cerrar el carrito", () => {
+  it("recuerda el elemento enfocado al abrir y lo entrega una sola vez", () => {
+    const button = document.createElement("button");
+    document.body.append(button);
+    button.focus();
+
+    useCartStore.getState().open();
+    expect(takeCartReturnFocus()).toBe(button);
+    expect(takeCartReturnFocus()).toBeNull();
+    button.remove();
+  });
+
+  it("no devuelve elementos que ya no están en la página", () => {
+    const button = document.createElement("button");
+    document.body.append(button);
+    button.focus();
+    useCartStore.getState().setOpen(true);
+    button.remove();
+    expect(takeCartReturnFocus()).toBeNull();
   });
 });

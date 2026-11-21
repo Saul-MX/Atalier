@@ -17,7 +17,7 @@ import {
   type CatalogSort,
   SORT_OPTIONS,
   withFilters,
-} from "@/lib/catalog/filters";
+} from "@/lib/catalog/filters-url";
 import { type CatalogFacets } from "@/lib/catalog/types";
 
 import { CatalogFilters } from "./catalog-filters";

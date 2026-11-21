@@ -1,5 +1,5 @@
-import { CartDrawer } from "@/components/cart/cart-drawer";
 import { CartHydrator } from "@/components/cart/cart-hydrator";
+import { LazyCartDrawer } from "@/components/cart/lazy-cart-drawer";
 import { SiteFooter } from "@/components/shop/site-footer";
 import { SiteHeader } from "@/components/shop/site-header";
 
@@ -17,7 +17,7 @@ export default function ShopLayout({ children }: LayoutProps<"/">) {
         {children}
       </main>
       <SiteFooter />
-      <CartDrawer />
+      <LazyCartDrawer />
       <CartHydrator />
     </>
   );

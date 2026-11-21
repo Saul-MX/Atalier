@@ -24,13 +24,41 @@ import {
   hasActiveFilters,
   parseCatalogFilters,
 } from "@/lib/catalog/filters";
-import { getCatalogFacets, getCatalogPage } from "@/server/catalog/queries";
+import { catalogIndexing, openGraphBase } from "@/lib/seo";
+import {
+  getCatalogFacets,
+  getCatalogPage,
+  getCategories,
+} from "@/server/catalog/queries";
 
-export const metadata: Metadata = {
-  title: "Catálogo",
-  description:
-    "Abrigos, camisas, punto, pantalones, vestidos y accesorios. Filtra por categoría, color, talla y precio.",
-};
+export async function generateMetadata({
+  searchParams,
+}: PageProps<"/catalogo">): Promise<Metadata> {
+  const filters = parseCatalogFilters(await searchParams);
+  const categories = await getCategories();
+  const category = categories.find((c) => c.slug === filters.category);
+  const { index, canonical } = catalogIndexing(filters);
+
+  const title = filters.q
+    ? `Resultados para «${filters.q}»`
+    : (category?.name ?? "Catálogo");
+  const description = category
+    ? `${category.name} de ATELIER: siluetas esenciales y materiales nobles. Filtra por color, talla y precio.`
+    : "Abrigos, camisas, punto, pantalones, vestidos y accesorios. Filtra por categoría, color, talla y precio.";
+
+  return {
+    title: filters.page > 1 ? `${title} — página ${filters.page}` : title,
+    description,
+    alternates: { canonical },
+    robots: index ? undefined : { index: false, follow: true },
+    openGraph: {
+      ...openGraphBase(),
+      title: `${title} · ATELIER`,
+      description,
+      url: canonical,
+    },
+  };
+}
 
 export default function CatalogPage({ searchParams }: PageProps<"/catalogo">) {
   return (
@@ -78,7 +106,14 @@ async function CatalogContent({
             <CatalogFilters filters={filters} facets={facets} />
           </aside>
 
-          <section aria-label="Productos" className="flex flex-col gap-6">
+          <section
+            aria-labelledby="catalogo-productos"
+            className="flex flex-col gap-6"
+          >
+            {/* Siempre visible para lectores: en móvil el h2 de filtros está oculto. */}
+            <h2 id="catalogo-productos" className="sr-only">
+              Productos
+            </h2>
             <CatalogToolbar
               filters={filters}
               facets={facets}
@@ -114,7 +149,7 @@ async function CatalogContent({
                 <ProductGrid
                   products={data.items}
                   headingLevel="h3"
-                  preloadCount={4}
+                  priorityCount={2}
                   className="lg:grid-cols-3"
                 />
               )}

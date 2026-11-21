@@ -1,3 +1,4 @@
+import { type Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -9,6 +10,15 @@ import { Price } from "@/components/shared/price";
 import { ProductGrid } from "@/components/shop/product-grid";
 import { Skeleton } from "@/components/ui/skeleton";
 import { catalogHref } from "@/lib/catalog/filters";
+import { publicEnv } from "@/lib/env/public";
+import {
+  jsonLd,
+  ogImageFromProductImage,
+  openGraphBase,
+  productJsonLd,
+  SITE,
+  truncate,
+} from "@/lib/seo";
 import {
   getActiveProductSlugs,
   getProductBySlug,
@@ -18,6 +28,34 @@ import {
 export async function generateStaticParams() {
   const slugs = await getActiveProductSlugs();
   return slugs.map((slug) => ({ slug }));
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps<"/producto/[slug]">): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProductBySlug(slug);
+  // Inexistente: la página llama a notFound() (Next añade noindex).
+  if (!product) return { title: "Producto no encontrado" };
+
+  const description = truncate(product.description);
+  const ogImage = ogImageFromProductImage(product.images[0]?.url);
+  return {
+    title: product.name,
+    description,
+    alternates: { canonical: `/producto/${product.slug}` },
+    openGraph: {
+      // Sin foto real (placeholders SVG) se usa la imagen OG del sitio.
+      ...openGraphBase(
+        ogImage
+          ? [{ url: ogImage, width: 1200, height: 630, alt: product.name }]
+          : undefined,
+      ),
+      title: `${product.name} · ${SITE.name}`,
+      description,
+      url: `/producto/${product.slug}`,
+    },
+  };
 }
 
 export default function ProductPage({ params }: PageProps<"/producto/[slug]">) {
@@ -38,9 +76,25 @@ async function ProductDetail({
   if (!product) notFound();
 
   const related = await getRelatedProducts(product.category.slug, product.slug);
+  const appUrl = publicEnv("NEXT_PUBLIC_APP_URL");
+  const structuredData = productJsonLd({
+    url: new URL(`/producto/${product.slug}`, appUrl).toString(),
+    name: product.name,
+    description: product.description,
+    images: product.images.map((image) =>
+      new URL(image.url, appUrl).toString(),
+    ),
+    price: product.price,
+    inStock: product.variants.some((variant) => variant.stock > 0),
+    category: product.category.name,
+  });
 
   return (
     <div className="flex flex-col gap-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLd(structuredData) }}
+      />
       <nav aria-label="Ruta de navegación">
         <ol className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
           <li>
@@ -129,7 +183,7 @@ function ProductSkeleton() {
       role="status"
       aria-label="Cargando producto"
     >
-      <Skeleton className="aspect-[3/4] w-full rounded-md" />
+      <Skeleton className="aspect-3/4 w-full rounded-md" />
       <div className="flex flex-col gap-4">
         <Skeleton className="h-3 w-24" />
         <Skeleton className="h-9 w-3/4" />

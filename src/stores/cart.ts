@@ -47,6 +47,28 @@ function clamp(quantity: number, max: number): number {
   return Math.max(0, Math.min(Math.floor(quantity), limit));
 }
 
+/**
+ * El drawer se abre desde varios sitios (cabecera, «Añadir al carrito», página
+ * de pago cancelado) y no usa un SheetTrigger de Radix, así que Radix no sabe
+ * a dónde devolver el foco al cerrarlo. Se recuerda aquí el elemento enfocado
+ * al abrir (no es estado de la UI: no va en el store).
+ */
+let returnFocusTarget: HTMLElement | null = null;
+
+function rememberFocus() {
+  if (typeof document === "undefined") return;
+  const active = document.activeElement;
+  returnFocusTarget =
+    active instanceof HTMLElement && active !== document.body ? active : null;
+}
+
+/** Elemento al que devolver el foco al cerrar el carrito (se consume una vez). */
+export function takeCartReturnFocus(): HTMLElement | null {
+  const target = returnFocusTarget;
+  returnFocusTarget = null;
+  return target?.isConnected ? target : null;
+}
+
 export const useCartStore = create<CartState>()(
   persist(
     (set, get) => ({
@@ -111,9 +133,15 @@ export const useCartStore = create<CartState>()(
       },
 
       clear: () => set({ items: [] }),
-      open: () => set({ isOpen: true }),
+      open: () => {
+        rememberFocus();
+        set({ isOpen: true });
+      },
       close: () => set({ isOpen: false }),
-      setOpen: (isOpen) => set({ isOpen }),
+      setOpen: (isOpen) => {
+        if (isOpen) rememberFocus();
+        set({ isOpen });
+      },
     }),
     {
       name: "atelier-cart",

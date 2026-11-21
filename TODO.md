@@ -75,11 +75,14 @@ Plan por fases basado en la hoja de ruta de [ATELIER.md](ATELIER.md) §11. Cada 
 
 ## Fase 7 — Pulido y publicación
 
-- [ ] SEO: metadata dinámica, Open Graph, `sitemap.ts`, `robots.ts`
-- [ ] PDP inexistente responde 200 + noindex (notFound dentro de Suspense); valorar 404 real
-- [ ] Rendimiento (`next/image`, caché) y Lighthouse ≥ 90
-- [ ] Auditoría de accesibilidad
-- [ ] README: decisiones técnicas, diagramas, credenciales de prueba, tarjeta 4242, guía local y de Vercel
+- [x] SEO: metadatos por página (canonical, Open Graph con imagen por defecto, Twitter), JSON-LD `Product` y `WebSite`, `sitemap.ts`, `robots.ts`, `noindex` en búsquedas y filtros
+- [x] PDP inexistente: se mantiene 200 + `noindex` (comportamiento documentado de Cache Components; un 404 real exigiría `dynamicParams = false` o una consulta a BD en el proxy)
+- [x] Rendimiento: Lighthouse móvil 91–93 / escritorio 100 (mediana de 5); imágenes LCP con `fetchPriority="high"`, zod fuera del cliente, diálogos con carga diferida; `inlineCss` probado y descartado
+- [x] Auditoría de accesibilidad: axe-core WCAG 2.1 AA en 36 páginas/estados → 0 infracciones; corregido el orden de encabezados del catálogo y la devolución del foco al cerrar el carrito
+- [x] README: decisiones técnicas, diagramas (arquitectura, pago, ER), capturas, calidad, guía local y de Vercel
+- [ ] Desplegar en Vercel (pendiente de la cuenta del usuario) y completar en el README la URL de la demo
+- [ ] Crear cuentas de demo (cliente y admin) y publicar sus credenciales en el README
+- [ ] Opcional: GIF de la demo y enlace a Figma (ATELIER.md §14)
 
 ## Pendientes / decisiones abiertas
 

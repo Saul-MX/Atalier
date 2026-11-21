@@ -11,7 +11,7 @@ import {
   catalogHref,
   toggleValue,
   withFilters,
-} from "@/lib/catalog/filters";
+} from "@/lib/catalog/filters-url";
 import { type CatalogFacets } from "@/lib/catalog/types";
 import { cn } from "@/lib/utils";
 

@@ -13,12 +13,11 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { catalogHref } from "@/lib/catalog/filters";
-import { SEARCH_MIN_LENGTH } from "@/lib/catalog/search";
+import { catalogHref } from "@/lib/catalog/filters-url";
+import { SEARCH_MIN_LENGTH } from "@/lib/catalog/search-config";
 import { type SearchResult } from "@/lib/catalog/types";
 
 import { ProductImage } from "./product-image";
@@ -33,10 +32,24 @@ type FetchResult =
   | { key: string; status: "done"; results: SearchResult[] }
   | { key: string; status: "error" };
 
-export function SearchDialog() {
+export type SearchDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  /** Botón que abrió el diálogo: recibe el foco al cerrar. */
+  returnFocusRef: React.RefObject<HTMLElement | null>;
+};
+
+/**
+ * Contenido del buscador. Se carga bajo demanda (ver SearchLauncher): no hay
+ * DialogTrigger de Radix, así que el foco se devuelve a mano al cerrar.
+ */
+export function SearchDialog({
+  open,
+  onOpenChange,
+  returnFocusRef,
+}: SearchDialogProps) {
   const router = useRouter();
   const inputId = useId();
-  const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [attempt, setAttempt] = useState(0);
   const [result, setResult] = useState<FetchResult | null>(null);
@@ -53,18 +66,6 @@ export function SearchDialog() {
         : result.status === "error"
           ? { status: "error" }
           : { status: "done", query: debounced, results: result.results };
-
-  // Atajo de teclado: Ctrl/Cmd + K
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key.toLowerCase() === "k" && (event.metaKey || event.ctrlKey)) {
-        event.preventDefault();
-        setOpen((value) => !value);
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
 
   useEffect(() => {
     if (debounced.length < SEARCH_MIN_LENGTH) return;
@@ -88,7 +89,7 @@ export function SearchDialog() {
     return () => controller.abort();
   }, [debounced, attempt]);
 
-  const close = () => setOpen(false);
+  const close = () => onOpenChange(false);
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -113,16 +114,17 @@ export function SearchDialog() {
     <Dialog
       open={open}
       onOpenChange={(value) => {
-        setOpen(value);
+        onOpenChange(value);
         if (!value) setQuery("");
       }}
     >
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="icon-lg" aria-label="Buscar productos">
-          <SearchIcon aria-hidden="true" />
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="top-[15%] translate-y-0 gap-4 sm:max-w-xl">
+      <DialogContent
+        className="top-[15%] translate-y-0 gap-4 sm:max-w-xl"
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          returnFocusRef.current?.focus();
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Buscar</DialogTitle>
           <DialogDescription>

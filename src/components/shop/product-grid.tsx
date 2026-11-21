@@ -9,15 +9,15 @@ const GRID = "grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-3 lg:grid-cols-4";
 type ProductGridProps = {
   products: ProductCardData[];
   headingLevel?: "h2" | "h3";
-  /** Precarga las primeras N imágenes (las que suelen quedar sobre el pliegue). */
-  preloadCount?: number;
+  /** Prioriza las primeras N imágenes (las visibles sin hacer scroll en móvil). */
+  priorityCount?: number;
   className?: string;
 };
 
 export function ProductGrid({
   products,
   headingLevel,
-  preloadCount = 0,
+  priorityCount = 0,
   className,
 }: ProductGridProps) {
   return (
@@ -27,7 +27,7 @@ export function ProductGrid({
           <ProductCard
             product={product}
             headingLevel={headingLevel}
-            preload={index < preloadCount}
+            priority={index < priorityCount}
           />
         </li>
       ))}

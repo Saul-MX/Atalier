@@ -1,36 +1,18 @@
 import { z } from "zod";
 
 /**
- * Filtros del catálogo <-> URL (searchParams). Se usa en el servidor (para leer
- * la URL) y en el cliente (para construir la siguiente URL). Es tolerante:
- * los valores inválidos se descartan en vez de romper la página.
+ * Lectura de los filtros del catálogo desde la URL (searchParams), con zod.
+ * Solo servidor: los componentes de cliente importan ./filters-url, que no
+ * arrastra zod al navegador. Es tolerante: los valores inválidos se descartan
+ * en vez de romper la página.
  *
  * Parámetros: categoria, q, color (repetible), talla (repetible),
  * precio_min / precio_max (pesos enteros), orden, pagina.
  */
 
-export const SORT_OPTIONS = {
-  novedades: "Novedades",
-  "precio-asc": "Precio: menor a mayor",
-  "precio-desc": "Precio: mayor a menor",
-} as const;
+import { type CatalogFilters, DEFAULT_SORT } from "./filters-url";
 
-export type CatalogSort = keyof typeof SORT_OPTIONS;
-export const DEFAULT_SORT: CatalogSort = "novedades";
-export const PAGE_SIZE = 12;
-
-export type CatalogFilters = {
-  category?: string;
-  q?: string;
-  colors: string[];
-  sizes: string[];
-  /** Centavos */
-  minPrice?: number;
-  /** Centavos */
-  maxPrice?: number;
-  sort: CatalogSort;
-  page: number;
-};
+export * from "./filters-url";
 
 export type RawSearchParams = Record<string, string | string[] | undefined>;
 
@@ -81,54 +63,4 @@ export function parseCatalogFilters(params: RawSearchParams): CatalogFilters {
     sort: optional(sortSchema, first(params.orden)) ?? DEFAULT_SORT,
     page: optional(pageSchema, first(params.pagina)) ?? 1,
   };
-}
-
-/** Convierte filtros a query string, omitiendo los valores por defecto. */
-export function serializeCatalogFilters(
-  filters: Partial<CatalogFilters>,
-): string {
-  const params = new URLSearchParams();
-  if (filters.category) params.set("categoria", filters.category);
-  if (filters.q) params.set("q", filters.q);
-  for (const color of filters.colors ?? []) params.append("color", color);
-  for (const size of filters.sizes ?? []) params.append("talla", size);
-  if (filters.minPrice !== undefined)
-    params.set("precio_min", String(Math.floor(filters.minPrice / 100)));
-  if (filters.maxPrice !== undefined)
-    params.set("precio_max", String(Math.floor(filters.maxPrice / 100)));
-  if (filters.sort && filters.sort !== DEFAULT_SORT)
-    params.set("orden", filters.sort);
-  if (filters.page && filters.page > 1)
-    params.set("pagina", String(filters.page));
-  return params.toString();
-}
-
-export function catalogHref(filters: Partial<CatalogFilters>): string {
-  const query = serializeCatalogFilters(filters);
-  return query ? `/catalogo?${query}` : "/catalogo";
-}
-
-/** Cualquier cambio de filtro vuelve a la página 1. */
-export function withFilters(
-  current: CatalogFilters,
-  patch: Partial<CatalogFilters>,
-): CatalogFilters {
-  return { ...current, page: 1, ...patch };
-}
-
-export function toggleValue(values: string[], value: string): string[] {
-  return values.includes(value)
-    ? values.filter((v) => v !== value)
-    : [...values, value];
-}
-
-export function hasActiveFilters(filters: CatalogFilters): boolean {
-  return Boolean(
-    filters.category ||
-    filters.q ||
-    filters.colors.length > 0 ||
-    filters.sizes.length > 0 ||
-    filters.minPrice !== undefined ||
-    filters.maxPrice !== undefined,
-  );
 }

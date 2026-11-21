@@ -12,13 +12,13 @@ const CARD_SIZES = "(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw";
 type ProductCardProps = {
   product: ProductCardData;
   headingLevel?: "h2" | "h3";
-  preload?: boolean;
+  priority?: boolean;
 };
 
 export function ProductCard({
   product,
   headingLevel: Heading = "h3",
-  preload,
+  priority,
 }: ProductCardProps) {
   const [mainImage, hoverImage] = product.images;
 
@@ -29,7 +29,7 @@ export function ProductCard({
           src={mainImage}
           alt={product.name}
           sizes={CARD_SIZES}
-          preload={preload}
+          priority={priority}
           className={cn(
             "transition duration-500 ease-out group-hover:scale-[1.02]",
             hoverImage && "group-focus-within:opacity-0 group-hover:opacity-0",

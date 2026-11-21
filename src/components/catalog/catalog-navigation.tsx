@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { createContext, use, useCallback, useTransition } from "react";
 
-import { type CatalogFilters, catalogHref } from "@/lib/catalog/filters";
+import { type CatalogFilters, catalogHref } from "@/lib/catalog/filters-url";
 import { cn } from "@/lib/utils";
 
 type CatalogNavigation = {
