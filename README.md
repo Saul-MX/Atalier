@@ -177,7 +177,8 @@ Lighthouse 13, mediana de 5 ejecuciones en móvil. \*En el catálogo los metadat
 | Rol     | Correo                   | Contraseña               |
 | ------- | ------------------------ | ------------------------ |
 | Cliente | _se publica con la demo_ | _se publica con la demo_ |
-| Admin   | _se publica con la demo_ | _se publica con la demo_ |
+
+El panel de administración no tiene cuenta pública, para que nadie pueda borrar el catálogo ni subir imágenes a la demo. Puedes verlo en las capturas del inicio de este README y en el código de `src/app/admin`.
 
 Tarjetas de Stripe en modo test: `4242 4242 4242 4242` (pago correcto), `4000 0000 0000 0002` (rechazada), `4000 0025 0000 3155` (pide 3D Secure).
 
