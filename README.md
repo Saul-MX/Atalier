@@ -223,7 +223,7 @@ Los tests de integración se niegan a ejecutarse si la base de datos no es local
 4. En Stripe (modo test), crea un endpoint de webhook a `https://<tu-dominio>/api/stripe/webhook` con los eventos `checkout.session.completed`, `checkout.session.expired`, `checkout.session.async_payment_succeeded` y `checkout.session.async_payment_failed`.
 5. En Google Cloud, añade `https://<tu-dominio>/api/auth/callback/google` como URI de redirección autorizada.
 
-El cron está definido en `vercel.json` cada 15 minutos. El plan Hobby de Vercel solo permite crons diarios; no es un problema porque el webhook de expiración es el mecanismo principal y el cron solo es el respaldo.
+El cron de `vercel.json` corre una vez al día (09:00 UTC) porque el plan Hobby de Vercel rechaza el despliegue si un cron se ejecuta más de una vez al día. No es un problema: el webhook `checkout.session.expired` es el mecanismo principal y el cron solo es el respaldo. En un plan Pro conviene cada 15 minutos (`*/15 * * * *`).
 
 ## Documentación del proyecto
 

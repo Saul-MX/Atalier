@@ -94,7 +94,7 @@ Tests unitarios colocados junto al código: `*.test.ts(x)`.
 
 1. **Dinero en centavos (`Int`)** en todas partes. Formatear solo en la UI. El servidor **ignora cualquier precio del cliente** y lo relee de la BD.
 2. **Reserva de stock** al crear el checkout: `UPDATE "ProductVariant" SET stock = stock - $qty WHERE id = $id AND stock >= $qty` con `$executeRaw` dentro de `prisma.$transaction`. 0 filas afectadas → abortar y responder **409** indicando la variante. Si falla Stripe → devolver stock y marcar `CANCELLED`.
-3. **Liberación de stock**: webhook `checkout.session.expired` + Vercel Cron `/api/cron/expire-orders` (cada 15 min) protegido con `Authorization: Bearer ${CRON_SECRET}`.
+3. **Liberación de stock**: webhook `checkout.session.expired` + Vercel Cron `/api/cron/expire-orders` (diario: límite del plan Hobby) protegido con `Authorization: Bearer ${CRON_SECRET}`.
 4. **Una orden pasa a `PAID` solo desde el webhook** y solo si `payment_status === "paid"`. Nunca desde `/checkout/success`.
 5. **Webhook**: `await req.text()` (body sin parsear) → `stripe.webhooks.constructEvent` → insertar `event.id` en `StripeEvent` (idempotencia); si ya existe, `200` sin hacer nada.
 6. **Admin**: verificar rol **dentro de cada Route Handler y Server Action** (`withAdmin(handler)` o `await requireAdmin()` + `toActionError`) y en cada página (`requireAdminPage`). `src/proxy.ts` y el layout de `/admin` son solo UX, nunca la barrera. La sesión no se cachea entre peticiones (revocar rol/baneo surte efecto inmediato). Comprobar roles solo con `isAdminRole()` (roles separados por comas).

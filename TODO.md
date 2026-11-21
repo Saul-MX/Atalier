@@ -56,7 +56,7 @@ Plan por fases basado en la hoja de ruta de [ATELIER.md](ATELIER.md) §11. Cada 
 - [x] Stripe Checkout Session (`metadata.orderId`, `expires_at` 31 min, `shipping_address_collection` MX, envío como `shipping_options`, solo tarjeta, idempotency key)
 - [x] Liberación de stock si falla Stripe (`CANCELLED`)
 - [x] `/api/stripe/webhook`: `req.text()`, firma, idempotencia `StripeEvent` en la misma transacción, `completed`+paid → PAID, `expired` → EXPIRED + stock
-- [x] `/api/cron/expire-orders` + `vercel.json` (cada 15 min, `CRON_SECRET`); expira la sesión en Stripe antes de liberar
+- [x] `/api/cron/expire-orders` + `vercel.json` (diario en Hobby, `CRON_SECRET`); expira la sesión en Stripe antes de liberar
 - [x] `/checkout/success` (solo lectura, se refresca hasta PAID) y `/checkout/cancel`
 - [x] Botón "Pagar" del CartDrawer conectado; ajusta el carrito al stock real en 409; vacía el carrito al confirmarse el pago
 - [x] Revalidar `CATALOG_TAG` cuando el checkout/webhook/cron cambian stock
