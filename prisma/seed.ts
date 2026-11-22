@@ -128,6 +128,11 @@ async function retireStaleCatalog() {
   const seedSlugs = PRODUCTS.map((product) => product.slug);
   const stale = { slug: { notIn: seedSlugs } };
 
+  // Sus SVG provisionales ya no existen en public/seed: sin imagen, el admin
+  // muestra el marcador en lugar de una imagen rota.
+  await prisma.productImage.deleteMany({
+    where: { publicId: { startsWith: "seed/" }, product: stale },
+  });
   const { count: deleted } = await prisma.product.deleteMany({
     where: { ...stale, variants: { none: { orderItems: { some: {} } } } },
   });

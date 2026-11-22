@@ -1,10 +1,10 @@
-# ATELIER
+﻿# ATELIER
 
 Tienda de moda contemporánea, de punta a punta: catálogo con filtros, carrito, pago con Stripe, panel de administración con subida de fotos a Cloudinary, gestión de pedidos y métricas de ventas.
 
 El reto técnico central es **no vender nunca más unidades de las que hay**, aunque varias personas compren la última unidad a la vez. Está resuelto con una reserva de stock atómica en PostgreSQL y lo demuestra un test con 20 compras simultáneas.
 
-**Demo:** _pendiente de despliegue_ · **Pago de prueba:** tarjeta `4242 4242 4242 4242`, cualquier fecha futura y cualquier CVC (Stripe en modo test: no se cobra nada).
+**Demo:** [atelier-bay-gamma.vercel.app](https://atelier-bay-gamma.vercel.app) · **Cuenta de cliente:** `cliente@example.com` / `atelier-demo-2026` · **Pago de prueba:** tarjeta `4242 4242 4242 4242`, cualquier fecha futura y cualquier CVC (Stripe en modo test: no se cobra nada).
 
 ![Inicio de la tienda](docs/screenshots/home.png)
 
@@ -159,24 +159,26 @@ erDiagram
 
 ## Calidad
 
-| Página (build de producción) | Rendimiento móvil | Rendimiento escritorio | Accesibilidad | Buenas prácticas | SEO |
-| ---------------------------- | :---------------: | :--------------------: | :-----------: | :--------------: | :-: |
-| Inicio                       |        93         |          100           |      100      |       100        | 100 |
-| Catálogo                     |        91         |          100           |      100      |       100        | 92* |
-| Ficha de producto            |        92         |          100           |      100      |       100        | 100 |
+| Página (demo en Vercel) | Rendimiento móvil | Rendimiento escritorio | Accesibilidad | Buenas prácticas | SEO |
+| ----------------------- | :---------------: | :--------------------: | :-----------: | :--------------: | :-: |
+| Inicio                  |        97         |          100           |      100      |       100        | 100 |
+| Catálogo                |        97         |          100           |      100      |       100        | 92* |
+| Ficha de producto       |        97         |          100           |      100      |       100        | 100 |
 
-Lighthouse 13, mediana de 5 ejecuciones en móvil. \*En el catálogo los metadatos dependen de la URL y Next 16 los envía en streaming a los navegadores; los rastreadores que no ejecutan JavaScript (Bing, redes sociales) los reciben en el `<head>`.
+Lighthouse 13 contra la demo publicada, mediana de 5 ejecuciones en móvil. \*En el catálogo los metadatos dependen de la URL y Next 16 los envía en streaming a los navegadores; los rastreadores que no ejecutan JavaScript (Bing, redes sociales) los reciben en el `<head>`.
 
-- **Tests:** 219 unitarios y de componentes (Vitest) y 17 de integración contra PostgreSQL real en Docker: concurrencia de stock, webhook duplicado y concurrente, expiración y cron.
+- **Tests:** 227 unitarios y de componentes (Vitest) y 17 de integración contra PostgreSQL real en Docker: concurrencia de stock, webhook duplicado y concurrente, expiración y cron.
 - **Accesibilidad:** auditoría con axe-core (WCAG 2.1 AA) de 36 páginas y estados, incluido el panel, en escritorio y móvil: 0 infracciones. Navegación completa con teclado, foco visible y devuelto al cerrar diálogos, y estados nunca indicados solo con color.
 - **Rendimiento:** el JavaScript inicial se redujo al sacar Zod del cliente y cargar los diálogos (búsqueda, menú, carrito) bajo demanda; las imágenes candidatas a LCP se piden con prioridad alta. Se probó `inlineCss` y se descartó porque empeoraba el primer pintado.
 - **SEO:** metadatos y Open Graph por página, datos estructurados `Product` y `WebSite`, `sitemap.xml`, `robots.txt`, y `noindex` en búsquedas y combinaciones de filtros.
 
 ## Credenciales de prueba
 
-| Rol     | Correo                   | Contraseña               |
-| ------- | ------------------------ | ------------------------ |
-| Cliente | _se publica con la demo_ | _se publica con la demo_ |
+| Rol     | Correo                | Contraseña          |
+| ------- | --------------------- | ------------------- |
+| Cliente | `cliente@example.com` | `atelier-demo-2026` |
+
+La cuenta es compartida: puedes comprar con la tarjeta de prueba y ver tus pedidos en «Mi cuenta». Los endpoints de Better Auth que editan la cuenta (contraseña, correo, nombre, borrado y cierre de las sesiones de otros) están desactivados para que nadie la bloquee.
 
 El panel de administración no tiene cuenta pública, para que nadie pueda borrar el catálogo ni subir imágenes a la demo. Puedes verlo en las capturas del inicio de este README y en el código de `src/app/admin`.
 

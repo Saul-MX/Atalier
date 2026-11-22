@@ -14,6 +14,18 @@ export const authOptions = {
     enabled: true,
     minPasswordLength: 8,
   },
+  // La tienda no ofrece editar la cuenta y la demo publica una cuenta de
+  // cliente compartida: sin estos endpoints nadie puede cambiarle la
+  // contraseña, el correo o el nombre ni cerrar las sesiones de los demás.
+  disabledPaths: [
+    "/change-password",
+    "/change-email",
+    "/update-user",
+    "/delete-user",
+    "/revoke-sessions",
+    "/revoke-other-sessions",
+    "/unlink-account",
+  ],
   plugins: [admin({ defaultRole: USER_ROLE, adminRoles: [ADMIN_ROLE] })],
 } satisfies Partial<BetterAuthOptions>;
 
