@@ -92,7 +92,7 @@ export default async function HomePage() {
                 <li key={collection.slug}>
                   <Link
                     href={catalogHref({ category: collection.slug })}
-                    className="group flex flex-col gap-3"
+                    className="flex flex-col gap-3"
                   >
                     <span className="relative block aspect-[3/4] overflow-hidden bg-muted">
                       <ProductImage
@@ -100,10 +100,9 @@ export default async function HomePage() {
                         alt=""
                         sizes="(min-width: 1024px) 25vw, 50vw"
                         priority={index < 2}
-                        className="transition duration-700 ease-out group-hover:scale-[1.03]"
                       />
                     </span>
-                    <span className="text-center label-caps underline-offset-4 group-hover:underline">
+                    <span className="text-center label-caps">
                       {collection.name}
                       <span className="sr-only">
                         {" "}

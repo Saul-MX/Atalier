@@ -19,11 +19,13 @@ import {
   deleteImage,
   deleteProduct,
   moveImage,
+  renameColor,
   saveVariants,
   setImageColor,
   updateProduct,
 } from "@/server/services/admin-products";
 import {
+  colorNameSchema,
   idSchema,
   imageColorSchema,
   parseProductForm,
@@ -267,6 +269,40 @@ export async function setImageColorAction(
 }
 
 // ─── Variantes ──────────────────────────────────────────────────────────────
+
+export async function renameColorAction(
+  productId: string,
+  from: string,
+  to: string,
+): Promise<ActionResult> {
+  const denied = await checkAdmin();
+  if (denied) return denied;
+
+  const id = idSchema.safeParse(productId);
+  const oldName = colorNameSchema.safeParse(from);
+  const newName = colorNameSchema.safeParse(to);
+  if (!newName.success) {
+    return {
+      ok: false,
+      error: newName.error.issues[0]?.message ?? "Nombre no válido.",
+    };
+  }
+  if (!id.success || !oldName.success) return INVALID;
+
+  const result = await renameColor(id.data, oldName.data, newName.data);
+  if (!result.ok) {
+    return result.reason === "taken"
+      ? {
+          ok: false,
+          error: `Ya hay un color «${newName.data}» en este producto.`,
+        }
+      : { ok: false, error: "El color ya no existe. Recarga la página." };
+  }
+
+  invalidateCatalog(result.slug);
+  refresh();
+  return { ok: true };
+}
 
 const variantLabel = (v: { color: string; size: string }) =>
   `${v.color} / ${v.size}`;

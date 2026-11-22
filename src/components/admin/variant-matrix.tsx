@@ -1,12 +1,21 @@
 "use client";
 
-import { ImagePlusIcon, Loader2Icon, PlusIcon, Trash2Icon } from "lucide-react";
-import { useMemo, useRef, useState, useTransition } from "react";
+import {
+  CheckIcon,
+  ImagePlusIcon,
+  Loader2Icon,
+  PencilIcon,
+  PlusIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import {
   attachImagesAction,
   getUploadSignatureAction,
+  renameColorAction,
   saveVariantsAction,
 } from "@/app/admin/productos/actions";
 import { ProductImage } from "@/components/shop/product-image";
@@ -161,6 +170,23 @@ export function VariantMatrix({
     });
   }
 
+  /** Renombra un color guardado (variantes y fotos). Devuelve si se guardó. */
+  async function renameSavedColor(from: string, to: string) {
+    if (dirty) {
+      showError(
+        "Guarda o descarta los cambios de stock antes de renombrar un color.",
+      );
+      return false;
+    }
+    const result = await renameColorAction(productId, from, to);
+    if (!result.ok) {
+      toast.error(result.error);
+      return false;
+    }
+    toast.success(`Color renombrado a «${to.trim()}».`);
+    return true;
+  }
+
   function pickPhoto(color: string) {
     photoColor.current = color;
     fileRef.current?.click();
@@ -313,9 +339,10 @@ export function VariantMatrix({
                           className="size-8 shrink-0 cursor-pointer rounded border bg-transparent p-0.5"
                         />
                         {row.saved ? (
-                          <span className="min-w-28 font-medium">
-                            {row.name}
-                          </span>
+                          <SavedColorName
+                            name={row.name}
+                            onRename={(to) => renameSavedColor(row.name, to)}
+                          />
                         ) : (
                           <Input
                             data-color-name={row.key}
@@ -490,5 +517,102 @@ export function VariantMatrix({
         </div>
       </div>
     </div>
+  );
+}
+
+/** Nombre de un color guardado, con edición en línea para renombrarlo. */
+function SavedColorName({
+  name,
+  onRename,
+}: {
+  name: string;
+  onRename: (to: string) => Promise<boolean>;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(name);
+  const [saving, setSaving] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const editRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (editing) inputRef.current?.select();
+  }, [editing]);
+
+  const close = () => {
+    setEditing(false);
+    requestAnimationFrame(() => editRef.current?.focus());
+  };
+
+  if (!editing) {
+    return (
+      <span className="flex min-w-28 items-center gap-1">
+        <span className="font-medium">{name}</span>
+        <Button
+          ref={editRef}
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          aria-label={`Renombrar el color ${name}`}
+          onClick={() => {
+            setValue(name);
+            setEditing(true);
+          }}
+        >
+          <PencilIcon aria-hidden="true" />
+        </Button>
+      </span>
+    );
+  }
+
+  return (
+    <form
+      className="flex items-center gap-1"
+      onSubmit={async (event) => {
+        event.preventDefault();
+        setSaving(true);
+        const saved = await onRename(value);
+        setSaving(false);
+        if (saved) setEditing(false);
+      }}
+    >
+      <Input
+        ref={inputRef}
+        aria-label={`Nuevo nombre del color ${name}`}
+        maxLength={40}
+        value={value}
+        disabled={saving}
+        onChange={(event) => setValue(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            event.preventDefault();
+            close();
+          }
+        }}
+        className="h-8 min-w-28"
+      />
+      <Button
+        type="submit"
+        variant="ghost"
+        size="icon-sm"
+        aria-label="Guardar nombre"
+        disabled={saving || !value.trim()}
+      >
+        {saving ? (
+          <Loader2Icon className="animate-spin" aria-hidden="true" />
+        ) : (
+          <CheckIcon aria-hidden="true" />
+        )}
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        aria-label="Cancelar"
+        disabled={saving}
+        onClick={close}
+      >
+        <XIcon aria-hidden="true" />
+      </Button>
+    </form>
   );
 }

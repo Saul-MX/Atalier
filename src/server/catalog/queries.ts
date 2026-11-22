@@ -57,15 +57,15 @@ function uniqueColors(
 }
 
 /**
- * Foto principal y de hover de la tarjeta. Al filtrar por color se muestran
- * las fotos del primer color filtrado que tenga fotos propias.
+ * Foto de la tarjeta: la principal o, al filtrar por color, la del primer
+ * color filtrado que tenga fotos propias.
  */
 function cardImages(images: CardRow["images"], colors: string[] = []) {
   const color = colors.find((name) =>
     images.some((image) => image.color === name),
   );
   const shown = color ? imagesForColor(images, color) : images;
-  return shown.slice(0, 2).map((image) => image.url);
+  return shown.slice(0, 1).map((image) => image.url);
 }
 
 function toCard(row: CardRow, colors?: string[]): ProductCardData {

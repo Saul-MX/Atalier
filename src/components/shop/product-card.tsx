@@ -20,30 +20,18 @@ export function ProductCard({
   headingLevel: Heading = "h3",
   priority,
 }: ProductCardProps) {
-  const [mainImage, hoverImage] = product.images;
+  const [mainImage] = product.images;
 
   return (
-    <article className="group relative flex flex-col gap-3">
+    <article className="relative flex flex-col gap-3">
       <div className="relative aspect-[3/4] overflow-hidden bg-muted">
         <ProductImage
           src={mainImage}
           alt={product.name}
           sizes={CARD_SIZES}
           priority={priority}
-          className={cn(
-            "transition duration-500 ease-out group-hover:scale-[1.02]",
-            hoverImage && "group-focus-within:opacity-0 group-hover:opacity-0",
-            !product.inStock && "opacity-70",
-          )}
+          className={cn(!product.inStock && "opacity-70")}
         />
-        {hoverImage && (
-          <ProductImage
-            src={hoverImage}
-            alt=""
-            sizes={CARD_SIZES}
-            className="opacity-0 transition duration-500 ease-out group-focus-within:opacity-100 group-hover:scale-[1.02] group-hover:opacity-100"
-          />
-        )}
         {!product.inStock && (
           <Badge
             variant="outline"

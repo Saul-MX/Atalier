@@ -28,7 +28,7 @@ function signedUpload(productId: string, name: string) {
  */
 
 const { prisma } = await import("@/lib/prisma");
-const { attachImages, saveVariants, setImageColor } =
+const { attachImages, renameColor, saveVariants, setImageColor } =
   await import("@/server/services/admin-products");
 const { reserveOrder } = await import("@/server/services/orders");
 
@@ -142,6 +142,37 @@ describe("fotos por color", () => {
     expect(
       await prisma.productImage.count({ where: { productId: product.id } }),
     ).toBe(3);
+  });
+
+  it("renombra un color en sus variantes y sus fotos", async () => {
+    const product = await createProduct();
+    await setImageColor(product.blanca, "Blanco");
+
+    expect(await renameColor(product.id, "Blanco", "Chalk White")).toEqual({
+      ok: true,
+      slug: "playera-boxy",
+    });
+    const colors = await prisma.productVariant.findMany({
+      where: { productId: product.id },
+      distinct: ["color"],
+      select: { color: true },
+      orderBy: { color: "asc" },
+    });
+    expect(colors.map((c) => c.color)).toEqual(["Chalk White", "Negro"]);
+    expect(await colorOf(product.blanca)).toBe("Chalk White");
+  });
+
+  it("no renombra a un color que ya existe ni uno que no existe", async () => {
+    const product = await createProduct();
+
+    expect(await renameColor(product.id, "Blanco", "Negro")).toEqual({
+      ok: false,
+      reason: "taken",
+    });
+    expect(await renameColor(product.id, "Rojo", "Azul")).toEqual({
+      ok: false,
+      reason: "not-found",
+    });
   });
 
   it("al quitar un color, sus fotos pasan a valer para todos", async () => {

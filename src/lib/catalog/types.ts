@@ -12,7 +12,7 @@ export type ProductCardData = {
   name: string;
   price: number;
   category: CategorySummary;
-  /** Imagen principal y, si existe, una secundaria para el hover. */
+  /** Foto de la tarjeta (la principal, o la del color filtrado). */
   images: string[];
   colors: ColorSwatch[];
   inStock: boolean;

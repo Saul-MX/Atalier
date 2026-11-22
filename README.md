@@ -167,7 +167,7 @@ erDiagram
 
 Lighthouse 13 contra la demo publicada, mediana de 5 ejecuciones en móvil. \*En el catálogo los metadatos dependen de la URL y Next 16 los envía en streaming a los navegadores; los rastreadores que no ejecutan JavaScript (Bing, redes sociales) los reciben en el `<head>`.
 
-- **Tests:** 238 unitarios y de componentes (Vitest) y 23 de integración contra PostgreSQL real en Docker: concurrencia de stock, webhook duplicado y concurrente, expiración y cron, y fotos por color.
+- **Tests:** 238 unitarios y de componentes (Vitest) y 25 de integración contra PostgreSQL real en Docker: concurrencia de stock, webhook duplicado y concurrente, expiración y cron, y fotos por color.
 - **Accesibilidad:** auditoría con axe-core (WCAG 2.1 AA) de 36 páginas y estados, incluido el panel, en escritorio y móvil: 0 infracciones. Navegación completa con teclado, foco visible y devuelto al cerrar diálogos, y estados nunca indicados solo con color.
 - **Rendimiento:** el JavaScript inicial se redujo al sacar Zod del cliente y cargar los diálogos (búsqueda, menú, carrito) bajo demanda; las imágenes candidatas a LCP se piden con prioridad alta. Se probó `inlineCss` y se descartó porque empeoraba el primer pintado.
 - **SEO:** metadatos y Open Graph por página, datos estructurados `Product` y `WebSite`, `sitemap.xml`, `robots.txt`, y `noindex` en búsquedas y combinaciones de filtros.

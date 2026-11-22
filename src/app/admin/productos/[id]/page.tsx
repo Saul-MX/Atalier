@@ -73,7 +73,7 @@ async function EditProduct({
   const warnings = readinessWarnings(product);
   // Remonta la matriz cuando cambian los datos guardados en el servidor.
   const variantsVersion = product.variants
-    .map((v) => `${v.id}:${v.stock}:${v.colorHex}`)
+    .map((v) => `${v.id}:${v.color}:${v.stock}:${v.colorHex}`)
     .join("|");
   // Primera foto de cada color, para la columna «Foto» de la matriz.
   const colorPhotos: Record<string, string> = {};

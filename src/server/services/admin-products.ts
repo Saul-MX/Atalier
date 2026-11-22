@@ -499,6 +499,55 @@ export async function setImageColor(
   return { ok: true, slug: image.product.slug };
 }
 
+export type RenameColorResult =
+  { ok: true; slug: string } | { ok: false; reason: "not-found" | "taken" };
+
+/**
+ * Renombra un color del producto: sus variantes y sus fotos. Los pedidos no
+ * cambian (guardan una copia del nombre de la línea al comprar).
+ */
+export async function renameColor(
+  productId: string,
+  from: string,
+  to: string,
+): Promise<RenameColorResult> {
+  const product = await prisma.product.findUnique({
+    where: { id: productId },
+    select: {
+      slug: true,
+      variants: { distinct: ["color"], select: { color: true } },
+    },
+  });
+  const colors = product?.variants.map((v) => v.color) ?? [];
+  if (!product || !colors.includes(from))
+    return { ok: false, reason: "not-found" };
+  if (to === from) return { ok: true, slug: product.slug };
+  if (colors.includes(to)) return { ok: false, reason: "taken" };
+
+  try {
+    await prisma.$transaction([
+      prisma.productVariant.updateMany({
+        where: { productId, color: from },
+        data: { color: to },
+      }),
+      prisma.productImage.updateMany({
+        where: { productId, color: from },
+        data: { color: to },
+      }),
+    ]);
+  } catch (error) {
+    // Carrera: otro admin creó ese color mientras tanto (@@unique).
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return { ok: false, reason: "taken" };
+    }
+    throw error;
+  }
+  return { ok: true, slug: product.slug };
+}
+
 // ─── Variantes ──────────────────────────────────────────────────────────────
 
 export type SaveVariantsResult =

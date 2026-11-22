@@ -173,6 +173,13 @@ export const uploadedImagesSchema = z
 
 export type UploadedImage = z.infer<typeof uploadedImagesSchema>[number];
 
+/** Nombre de un color de variante (al renombrarlo). */
+export const colorNameSchema = z
+  .string()
+  .trim()
+  .min(1, "Escribe el nombre del color.")
+  .max(40, "Nombre de color demasiado largo.");
+
 /** Color al que se asigna una foto; null = todos los colores. */
 export const imageColorSchema = z.string().trim().min(1).max(40).nullable();
 
