@@ -48,6 +48,19 @@ type ColorRow = { key: string; name: string; hex: string; saved: boolean };
 
 const STOCK_PATTERN = /^\d{1,4}$/;
 
+/** Clave fija (no aleatoria: se renderiza también en el servidor). */
+const FIRST_COLOR_KEY = "new-first";
+
+/**
+ * Filas iniciales: los colores guardados o, si el producto aún no tiene
+ * ninguno, una fila vacía para escribir su color (basta con uno).
+ */
+function startingRows(saved: { name: string; hex: string }[]): ColorRow[] {
+  if (saved.length === 0)
+    return [{ key: FIRST_COLOR_KEY, name: "", hex: "#888888", saved: false }];
+  return saved.map((c) => ({ ...c, key: c.name, saved: true }));
+}
+
 /**
  * Matriz talla × color con el stock de cada variante. Cada combinación de
  * colores y tallas elegidos es una variante. El servidor solo escribe las
@@ -78,7 +91,7 @@ export function VariantMatrix({
   );
 
   const [colors, setColors] = useState<ColorRow[]>(() =>
-    initial.colors.map((c) => ({ ...c, key: c.name, saved: true })),
+    startingRows(initial.colors),
   );
   const [sizes, setSizes] = useState<string[]>(initial.sizes);
   const [stock, setStock] = useState<Record<string, string>>(() =>
@@ -116,7 +129,15 @@ export function VariantMatrix({
         .map((c) => [c.color, c.size, c.stock] as const)
         .sort((a, b) => cellKey(a[0], a[1]).localeCompare(cellKey(b[0], b[1]))),
     });
-  const dirty = serialize(toInput()) !== serialize(initial);
+  // La fila vacía con la que arranca un producto sin colores no cuenta como
+  // cambio hasta que se escribe algo en ella.
+  const untouchedStart =
+    initial.colors.length === 0 &&
+    colors.length === 1 &&
+    colors[0]!.key === FIRST_COLOR_KEY &&
+    !colors[0]!.name.trim() &&
+    sizes.every((size) => (Number(stockValue(colors[0]!, size)) || 0) === 0);
+  const dirty = !untouchedStart && serialize(toInput()) !== serialize(initial);
 
   const invalidCells = colors.flatMap((row) =>
     sizes.filter((size) => !STOCK_PATTERN.test(stockValue(row, size))),
@@ -234,7 +255,7 @@ export function VariantMatrix({
   }
 
   function reset() {
-    setColors(initial.colors.map((c) => ({ ...c, key: c.name, saved: true })));
+    setColors(startingRows(initial.colors));
     setSizes(initial.sizes);
     setStock(
       Object.fromEntries(
@@ -283,10 +304,18 @@ export function VariantMatrix({
         </p>
       )}
 
+      {initial.colors.length === 0 && (
+        <p className="text-sm text-muted-foreground">
+          Elige las tallas, escribe el color de este producto y el stock de cada
+          talla. Basta con un color; si vendes otro color como producto aparte,
+          enlázalos con el mismo «Modelo».
+        </p>
+      )}
+
       {colors.length === 0 || sizes.length === 0 ? (
         <p className="rounded-lg border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
           {colors.length === 0
-            ? "Añade al menos un color para crear variantes."
+            ? "Añade un color para crear variantes."
             : "Elige al menos una talla."}
         </p>
       ) : (
@@ -347,7 +376,7 @@ export function VariantMatrix({
                           <Input
                             data-color-name={row.key}
                             aria-label="Nombre del color nuevo"
-                            placeholder="Nombre"
+                            placeholder="Ej.: Washed Black"
                             maxLength={40}
                             value={row.name}
                             onChange={(event) =>

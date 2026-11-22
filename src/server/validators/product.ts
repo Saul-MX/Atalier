@@ -112,7 +112,7 @@ export const variantMatrixSchema = z
             .regex(/^#[0-9a-f]{6}$/i, "Color no válido (formato #RRGGBB)."),
         }),
       )
-      .min(1, "Añade al menos un color.")
+      .min(1, "Añade el color del producto (basta con uno).")
       .max(MAX_COLORS, `Máximo ${MAX_COLORS} colores.`),
     sizes: z.array(sizeSchema).min(1, "Elige al menos una talla."),
     cells: z
