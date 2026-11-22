@@ -25,7 +25,8 @@ export type ProductDetailData = {
   description: string;
   price: number;
   category: CategorySummary;
-  images: { id: string; url: string }[];
+  /** `color: null` = foto válida para todos los colores. */
+  images: { id: string; url: string; color: string | null }[];
   variants: VariantOption[];
 };
 

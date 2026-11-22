@@ -143,12 +143,13 @@ async function EditProduct({
 
       <Section
         title="Fotos"
-        description="Se suben directamente a Cloudinary. La primera es la principal."
+        description="Se suben directamente a Cloudinary. La primera es la principal y cada una puede asignarse a un color."
       >
         <ImageManager
           productId={product.id}
           productName={product.name}
           images={product.images}
+          colors={[...new Set(product.variants.map((v) => v.color))]}
         />
       </Section>
 

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { type OrderStatus, type Prisma } from "@/generated/prisma/client";
+import { imagesForColor } from "@/lib/catalog/product-images";
 import { CHECKOUT_TTL_MINUTES, orderTotals } from "@/lib/checkout/totals";
 import { SOLD_STATUSES } from "@/lib/orders/status";
 import { prisma } from "@/lib/prisma";
@@ -81,8 +82,7 @@ export async function reserveOrder(input: {
               active: true,
               images: {
                 orderBy: { position: "asc" },
-                take: 1,
-                select: { url: true },
+                select: { url: true, color: true },
               },
             },
           },
@@ -123,7 +123,9 @@ export async function reserveOrder(input: {
           name: variant.product.name,
           color: variant.color,
           size: variant.size,
-          image: variant.product.images[0]?.url ?? null,
+          image:
+            imagesForColor(variant.product.images, variant.color)[0]?.url ??
+            null,
         };
       });
       const totals = orderTotals(lines);

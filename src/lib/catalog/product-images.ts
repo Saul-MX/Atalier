@@ -15,6 +15,23 @@ export const ACCEPTED_IMAGE_TYPES = [
   "image/avif",
 ] as const;
 
+/**
+ * Fotos que se muestran con un color elegido, en su orden. Una foto con
+ * `color: null` vale para todos los colores.
+ * - Si el color tiene fotos propias: esas primero y después las generales.
+ * - Si no: solo las generales; si tampoco hay, todas (mejor otra foto que
+ *   ninguna).
+ */
+export function imagesForColor<T extends { color: string | null }>(
+  images: T[],
+  color: string | null | undefined,
+): T[] {
+  const general = images.filter((image) => image.color === null);
+  const own = color ? images.filter((image) => image.color === color) : [];
+  if (own.length > 0) return [...own, ...general];
+  return general.length > 0 ? general : images;
+}
+
 /** Motivo por el que un archivo no se puede subir, o null si es válido. */
 export function rejectFile(file: {
   type: string;

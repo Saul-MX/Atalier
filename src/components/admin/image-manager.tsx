@@ -16,6 +16,7 @@ import {
   deleteImageAction,
   getUploadSignatureAction,
   moveImageAction,
+  setImageColorAction,
 } from "@/app/admin/productos/actions";
 import { ProductImage } from "@/components/shop/product-image";
 import {
@@ -47,6 +48,7 @@ type ManagedImage = {
   id: string;
   url: string;
   isPlaceholder: boolean;
+  color: string | null;
 };
 
 type QueueItem = {
@@ -60,17 +62,20 @@ type ImageManagerProps = {
   productId: string;
   productName: string;
   images: ManagedImage[];
+  /** Colores de las variantes, para asignar cada foto a uno. */
+  colors: string[];
 };
 
 /**
  * Fotos del producto: subida múltiple con drag-and-drop directa a Cloudinary
- * (firma del servidor), orden con botones (accesible por teclado) y borrado.
- * La primera foto es la principal.
+ * (firma del servidor), orden con botones (accesible por teclado), color de
+ * variante y borrado. La primera foto es la principal.
  */
 export function ImageManager({
   productId,
   productName,
   images,
+  colors,
 }: ImageManagerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLOListElement>(null);
@@ -343,6 +348,14 @@ export function ImageManager({
         </p>
       )}
 
+      {images.length > 0 && (
+        <p className="text-xs text-muted-foreground">
+          {colors.length > 1
+            ? "Asigna cada foto a su color: en la tienda, al elegir un color se muestran sus fotos. «Todos los colores» sirve para detalles comunes."
+            : "Cuando el producto tenga varios colores en «Variantes y stock», podrás asignar cada foto a su color."}
+        </p>
+      )}
+
       {images.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           Este producto aún no tiene fotos. En la tienda se mostrará un marcador
@@ -371,6 +384,40 @@ export function ImageManager({
                     )}
                   </div>
                 </div>
+                {colors.length > 1 && (
+                  <div className="flex items-center gap-2">
+                    <label
+                      htmlFor={`image-color-${image.id}`}
+                      className="shrink-0 text-xs text-muted-foreground"
+                    >
+                      Color<span className="sr-only"> ({label})</span>
+                    </label>
+                    <select
+                      id={`image-color-${image.id}`}
+                      value={image.color ?? ""}
+                      disabled={busy}
+                      data-focus={`${image.id}:color`}
+                      onChange={(event) => {
+                        const color = event.target.value || null;
+                        runImageAction(
+                          () => setImageColorAction(image.id, color),
+                          `${image.id}:color`,
+                          color
+                            ? `Foto asignada al color ${color}.`
+                            : "Foto asignada a todos los colores.",
+                        );
+                      }}
+                      className="h-8 min-w-0 flex-1 border border-input bg-background px-2 text-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-60"
+                    >
+                      <option value="">Todos los colores</option>
+                      {colors.map((color) => (
+                        <option key={color} value={color}>
+                          {color}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <div className="flex items-center gap-1">
                   <Button
                     type="button"

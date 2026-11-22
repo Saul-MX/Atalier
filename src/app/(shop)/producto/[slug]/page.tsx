@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { ProductColorProvider } from "@/components/product/product-color";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { ProductPurchase } from "@/components/product/product-purchase";
 import { Container } from "@/components/shared/container";
@@ -10,6 +11,7 @@ import { Price } from "@/components/shared/price";
 import { ProductGrid } from "@/components/shop/product-grid";
 import { Skeleton } from "@/components/ui/skeleton";
 import { catalogHref } from "@/lib/catalog/filters";
+import { defaultColor } from "@/lib/catalog/variants";
 import { publicEnv } from "@/lib/env/public";
 import {
   jsonLd,
@@ -118,38 +120,42 @@ async function ProductDetail({
         </ol>
       </nav>
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,3fr)] lg:gap-14">
-        <ProductGallery images={product.images} productName={product.name} />
+      <ProductColorProvider initialColor={defaultColor(product.variants) ?? ""}>
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,3fr)] lg:gap-14">
+          <ProductGallery images={product.images} productName={product.name} />
 
-        <div className="flex flex-col gap-7 lg:sticky lg:top-28 lg:self-start">
-          <header className="flex flex-col gap-2">
-            <p className="text-[0.625rem] tracking-[0.2em] text-muted-foreground uppercase">
-              {product.category.name}
-            </p>
-            <h1 className="text-xl font-normal text-balance">{product.name}</h1>
-            <p className="text-sm">
-              <Price cents={product.price} /> MXN
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Impuestos incluidos. Envío calculado al pagar.
-            </p>
-            <p className="mt-3 text-[0.8125rem] leading-relaxed text-pretty text-muted-foreground">
-              {product.description}
-            </p>
-          </header>
+          <div className="flex flex-col gap-7 lg:sticky lg:top-28 lg:self-start">
+            <header className="flex flex-col gap-2">
+              <p className="text-[0.625rem] tracking-[0.2em] text-muted-foreground uppercase">
+                {product.category.name}
+              </p>
+              <h1 className="text-xl font-normal text-balance">
+                {product.name}
+              </h1>
+              <p className="text-sm">
+                <Price cents={product.price} /> MXN
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Impuestos incluidos. Envío calculado al pagar.
+              </p>
+              <p className="mt-3 text-[0.8125rem] leading-relaxed text-pretty text-muted-foreground">
+                {product.description}
+              </p>
+            </header>
 
-          <ProductPurchase
-            product={{
-              id: product.id,
-              slug: product.slug,
-              name: product.name,
-              price: product.price,
-              image: product.images[0]?.url ?? null,
-              variants: product.variants,
-            }}
-          />
+            <ProductPurchase
+              product={{
+                id: product.id,
+                slug: product.slug,
+                name: product.name,
+                price: product.price,
+                images: product.images,
+                variants: product.variants,
+              }}
+            />
+          </div>
         </div>
-      </div>
+      </ProductColorProvider>
 
       {related.length > 0 && (
         <section

@@ -20,10 +20,12 @@ import {
   deleteProduct,
   moveImage,
   saveVariants,
+  setImageColor,
   updateProduct,
 } from "@/server/services/admin-products";
 import {
   idSchema,
+  imageColorSchema,
   parseProductForm,
   uploadedImagesSchema,
   variantMatrixSchema,
@@ -225,6 +227,32 @@ export async function deleteImageAction(
 
   const result = await deleteImage(id.data);
   if (!result.ok) return IMAGE_GONE;
+
+  invalidateCatalog(result.slug);
+  refresh();
+  return { ok: true };
+}
+
+export async function setImageColorAction(
+  imageId: string,
+  color: string | null,
+): Promise<ActionResult> {
+  const denied = await checkAdmin();
+  if (denied) return denied;
+
+  const id = idSchema.safeParse(imageId);
+  const parsedColor = imageColorSchema.safeParse(color);
+  if (!id.success || !parsedColor.success) return INVALID;
+
+  const result = await setImageColor(id.data, parsedColor.data);
+  if (!result.ok) {
+    return result.reason === "unknown-color"
+      ? {
+          ok: false,
+          error: "Ese color ya no existe en las variantes. Recarga la página.",
+        }
+      : IMAGE_GONE;
+  }
 
   invalidateCatalog(result.slug);
   refresh();

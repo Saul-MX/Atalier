@@ -12,11 +12,34 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { imagesForColor } from "@/lib/catalog/product-images";
 import { cn } from "@/lib/utils";
 
-type GalleryImage = { id: string; url: string };
+import { useProductColor } from "./product-color";
 
+type GalleryImage = { id: string; url: string; color: string | null };
+
+/** Galería de la ficha: muestra las fotos del color elegido en el selector. */
 export function ProductGallery({
+  images,
+  productName,
+}: {
+  images: GalleryImage[];
+  productName: string;
+}) {
+  const { color } = useProductColor("");
+  const hasOwnPhotos = images.some((image) => image.color === color);
+  return (
+    // La key reinicia la galería (foto 1) al cambiar de color.
+    <GalleryView
+      key={color}
+      images={imagesForColor(images, color)}
+      productName={hasOwnPhotos ? `${productName}, ${color}` : productName}
+    />
+  );
+}
+
+function GalleryView({
   images,
   productName,
 }: {

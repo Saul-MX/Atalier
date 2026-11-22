@@ -79,12 +79,14 @@ async function seedProducts(categoryIds: Map<string, string>) {
         });
         if (realImages === 0)
           await tx.productImage.createMany({
-            data: product.colors.map((_, position) => ({
+            // Una foto por color: la ficha la muestra al elegir ese color.
+            data: product.colors.map((color, position) => ({
               productId,
               url: seedImagePath(product.slug, position),
               publicId: seedImagePublicId(product.slug, position),
               isMain: position === 0,
               position,
+              color: color.name,
             })),
           });
 
@@ -118,27 +120,34 @@ async function seedProducts(categoryIds: Map<string, string>) {
 }
 
 /**
- * Retira lo que ya no está en el catálogo de demo (p. ej. tras cambiar las
- * categorías). Los productos con pedidos no se pueden borrar (los pedidos
- * conservan sus líneas), así que se desactivan; las categorías se borran
- * cuando se quedan vacías. Los productos creados desde el admin también se
- * retiran: el seed define el catálogo de la demo.
+ * Retira los productos de un catálogo de demo anterior (p. ej. tras cambiar
+ * las categorías). Se reconocen por sus fotos provisionales del seed: los
+ * creados desde el admin nunca las tienen, así que no se tocan. Los que tienen
+ * pedidos no se pueden borrar (los pedidos conservan sus líneas) y se
+ * desactivan; las categorías se borran cuando se quedan vacías.
  */
 async function retireStaleCatalog() {
   const seedSlugs = PRODUCTS.map((product) => product.slug);
-  const stale = { slug: { notIn: seedSlugs } };
+  const stale = {
+    slug: { notIn: seedSlugs },
+    images: { some: { publicId: { startsWith: "seed/" } } },
+  };
 
-  // Sus SVG provisionales ya no existen en public/seed: sin imagen, el admin
-  // muestra el marcador en lugar de una imagen rota.
-  await prisma.productImage.deleteMany({
-    where: { publicId: { startsWith: "seed/" }, product: stale },
-  });
   const { count: deleted } = await prisma.product.deleteMany({
     where: { ...stale, variants: { none: { orderItems: { some: {} } } } },
   });
   const { count: deactivated } = await prisma.product.updateMany({
     where: { ...stale, active: true },
     data: { active: false },
+  });
+  // Sus SVG provisionales ya no existen en public/seed: sin imagen, el admin
+  // muestra el marcador en lugar de una imagen rota. (Al final: `stale` los
+  // identifica por esas imágenes.)
+  await prisma.productImage.deleteMany({
+    where: {
+      publicId: { startsWith: "seed/" },
+      product: { slug: { notIn: seedSlugs } },
+    },
   });
   const { count: categories } = await prisma.category.deleteMany({
     where: {

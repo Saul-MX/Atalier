@@ -108,6 +108,8 @@ export type AdminProductImage = {
   url: string;
   isMain: boolean;
   isPlaceholder: boolean;
+  /** Color de variante al que pertenece; null = todos. */
+  color: string | null;
 };
 
 export type AdminVariant = {
@@ -148,7 +150,13 @@ export async function getAdminProduct(
         active: true,
         images: {
           orderBy: [{ position: "asc" }, { id: "asc" }],
-          select: { id: true, url: true, publicId: true, isMain: true },
+          select: {
+            id: true,
+            url: true,
+            publicId: true,
+            isMain: true,
+            color: true,
+          },
         },
         variants: {
           orderBy: { id: "asc" },
@@ -436,6 +444,43 @@ export async function deleteImage(
   return { ok: true, slug: image.product.slug };
 }
 
+export type SetImageColorResult =
+  | { ok: true; slug: string }
+  | { ok: false; reason: "not-found" | "unknown-color" };
+
+/**
+ * Asigna la foto a un color de variante (o a todos con `null`). El color debe
+ * existir en las variantes del producto: así la ficha puede mostrarla al
+ * elegirlo.
+ */
+export async function setImageColor(
+  imageId: string,
+  color: string | null,
+): Promise<SetImageColorResult> {
+  const image = await prisma.productImage.findUnique({
+    where: { id: imageId },
+    select: {
+      productId: true,
+      product: { select: { slug: true } },
+    },
+  });
+  if (!image) return { ok: false, reason: "not-found" };
+
+  if (color !== null) {
+    const variant = await prisma.productVariant.findFirst({
+      where: { productId: image.productId, color },
+      select: { id: true },
+    });
+    if (!variant) return { ok: false, reason: "unknown-color" };
+  }
+
+  await prisma.productImage.update({
+    where: { id: imageId },
+    data: { color },
+  });
+  return { ok: true, slug: image.product.slug };
+}
+
 // ─── Variantes ──────────────────────────────────────────────────────────────
 
 export type SaveVariantsResult =
@@ -539,6 +584,19 @@ export async function saveVariants(
           data: plan.create.map((variant) => ({ ...variant, productId })),
         });
       }
+      // Las fotos de un color que ya no existe pasan a valer para todos.
+      const colors = await tx.productVariant.findMany({
+        where: { productId },
+        distinct: ["color"],
+        select: { color: true },
+      });
+      await tx.productImage.updateMany({
+        where: {
+          productId,
+          color: { not: null, notIn: colors.map((v) => v.color) },
+        },
+        data: { color: null },
+      });
     });
   } catch (error) {
     if (error instanceof StockConflict) {

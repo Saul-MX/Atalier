@@ -4,6 +4,7 @@ import { cacheLife, cacheTag } from "next/cache";
 
 import { type Prisma } from "@/generated/prisma/client";
 import { type CatalogFilters, PAGE_SIZE } from "@/lib/catalog/filters";
+import { imagesForColor } from "@/lib/catalog/product-images";
 import { compareSizes } from "@/lib/catalog/sizes";
 import {
   type CatalogFacets,
@@ -37,7 +38,8 @@ const cardSelect = {
   name: true,
   basePrice: true,
   category: { select: { name: true, slug: true } },
-  images: { orderBy: imageOrder, take: 2, select: { url: true } },
+  // Todas (máx. MAX_PRODUCT_IMAGES): al filtrar por color se elige su foto.
+  images: { orderBy: imageOrder, select: { url: true, color: true } },
   variants: { select: { color: true, colorHex: true, stock: true } },
 } satisfies Prisma.ProductSelect;
 
@@ -54,14 +56,26 @@ function uniqueColors(
   return [...seen.values()];
 }
 
-function toCard(row: CardRow): ProductCardData {
+/**
+ * Foto principal y de hover de la tarjeta. Al filtrar por color se muestran
+ * las fotos del primer color filtrado que tenga fotos propias.
+ */
+function cardImages(images: CardRow["images"], colors: string[] = []) {
+  const color = colors.find((name) =>
+    images.some((image) => image.color === name),
+  );
+  const shown = color ? imagesForColor(images, color) : images;
+  return shown.slice(0, 2).map((image) => image.url);
+}
+
+function toCard(row: CardRow, colors?: string[]): ProductCardData {
   return {
     id: row.id,
     slug: row.slug,
     name: row.name,
     price: row.basePrice,
     category: row.category,
-    images: row.images.map((image) => image.url),
+    images: cardImages(row.images, colors),
     colors: uniqueColors(row.variants),
     inStock: row.variants.some((v) => v.stock > 0),
   };
@@ -125,7 +139,7 @@ export async function getNewArrivals(limit = 8): Promise<ProductCardData[]> {
     take: limit,
     select: cardSelect,
   });
-  return rows.map(toCard);
+  return rows.map((row) => toCard(row));
 }
 
 export async function getCatalogFacets(): Promise<CatalogFacets> {
@@ -226,7 +240,7 @@ export async function getCatalogPage(
   ]);
 
   return {
-    items: rows.map(toCard),
+    items: rows.map((row) => toCard(row, filters.colors)),
     total,
     page: filters.page,
     pageCount: Math.max(1, Math.ceil(total / PAGE_SIZE)),
@@ -249,7 +263,10 @@ export async function getProductBySlug(
       description: true,
       basePrice: true,
       category: { select: { name: true, slug: true } },
-      images: { orderBy: imageOrder, select: { id: true, url: true } },
+      images: {
+        orderBy: imageOrder,
+        select: { id: true, url: true, color: true },
+      },
       variants: {
         select: {
           id: true,
@@ -300,7 +317,7 @@ export async function getRelatedProducts(
     take: limit,
     select: cardSelect,
   });
-  return rows.map(toCard);
+  return rows.map((row) => toCard(row));
 }
 
 export async function searchProducts(

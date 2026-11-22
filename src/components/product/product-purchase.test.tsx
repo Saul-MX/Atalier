@@ -4,6 +4,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { useCartStore } from "@/stores/cart";
 
+import { ProductColorProvider } from "./product-color";
+import { ProductGallery } from "./product-gallery";
 import { ProductPurchase, type PurchaseProduct } from "./product-purchase";
 
 const product: PurchaseProduct = {
@@ -11,7 +13,10 @@ const product: PurchaseProduct = {
   slug: "abrigo-lana",
   name: "Abrigo de lana",
   price: 489_900,
-  image: "/seed/abrigo-1.svg",
+  images: [
+    { url: "/seed/abrigo-general.svg", color: null },
+    { url: "/seed/abrigo-camel.svg", color: "Camel" },
+  ],
   variants: [
     { id: "n-s", color: "Negro", colorHex: "#000", size: "S", stock: 2 },
     { id: "n-m", color: "Negro", colorHex: "#000", size: "M", stock: 0 },
@@ -81,6 +86,62 @@ describe("ProductPurchase", () => {
       }),
     ]);
     expect(isOpen).toBe(true);
+  });
+
+  it("guarda en el carrito la foto del color elegido", async () => {
+    const user = userEvent.setup();
+    render(<ProductPurchase product={product} />);
+
+    await user.click(screen.getByRole("radio", { name: "Camel" }));
+    await user.click(within(sizeGroup()).getByRole("radio", { name: "M" }));
+    await user.click(
+      screen.getByRole("button", { name: /añadir al carrito/i }),
+    );
+
+    expect(useCartStore.getState().items[0]).toMatchObject({
+      color: "Camel",
+      image: "/seed/abrigo-camel.svg",
+    });
+  });
+
+  it("sin fotos del color, usa una foto general", async () => {
+    const user = userEvent.setup();
+    render(<ProductPurchase product={product} />);
+
+    await user.click(within(sizeGroup()).getByRole("radio", { name: "S" }));
+    await user.click(
+      screen.getByRole("button", { name: /añadir al carrito/i }),
+    );
+
+    expect(useCartStore.getState().items[0]).toMatchObject({
+      color: "Negro",
+      image: "/seed/abrigo-general.svg",
+    });
+  });
+
+  it("al cambiar de color, la galería muestra sus fotos", async () => {
+    const user = userEvent.setup();
+    render(
+      <ProductColorProvider initialColor="Negro">
+        <ProductGallery
+          productName="Abrigo de lana"
+          images={[
+            { id: "g", url: "/seed/abrigo-general.svg", color: null },
+            { id: "c", url: "/seed/abrigo-camel.svg", color: "Camel" },
+          ]}
+        />
+        <ProductPurchase product={product} />
+      </ProductColorProvider>,
+    );
+
+    // Negro no tiene fotos propias: solo la general, sin miniaturas.
+    expect(screen.getByRole("img", { name: "Abrigo de lana" })).toBeVisible();
+    expect(screen.queryByRole("list", { name: "Miniaturas" })).toBeNull();
+
+    await user.click(screen.getByRole("radio", { name: "Camel" }));
+    expect(
+      screen.getByRole("img", { name: "Abrigo de lana, Camel, imagen 1 de 2" }),
+    ).toBeVisible();
   });
 
   it("muestra el producto como agotado si no hay stock", () => {

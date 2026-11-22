@@ -4,6 +4,7 @@ import { useId, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { imagesForColor } from "@/lib/catalog/product-images";
 import {
   colorOptions,
   defaultColor,
@@ -19,6 +20,7 @@ import { FREE_SHIPPING_THRESHOLD } from "@/lib/shipping";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/stores/cart";
 
+import { useProductColor } from "./product-color";
 import { SizeGuideDialog } from "./size-guide-dialog";
 
 export type PurchaseProduct = {
@@ -26,7 +28,8 @@ export type PurchaseProduct = {
   slug: string;
   name: string;
   price: number;
-  image: string | null;
+  /** Para la miniatura del carrito: la primera foto del color elegido. */
+  images: { url: string; color: string | null }[];
   variants: VariantOption[];
 };
 
@@ -38,8 +41,8 @@ export function ProductPurchase({ product }: { product: PurchaseProduct }) {
   const sizeGroupRef = useRef<HTMLFieldSetElement>(null);
 
   const colors = colorOptions(product.variants);
-  const [color, setColor] = useState(
-    () => defaultColor(product.variants) ?? "",
+  const { color, setColor } = useProductColor(
+    defaultColor(product.variants) ?? "",
   );
   const sizes = sizeOptionsFor(product.variants, color);
   const isOneSize = sizes.length === 1 && sizes[0]?.size === "Única";
@@ -81,7 +84,7 @@ export function ProductPurchase({ product }: { product: PurchaseProduct }) {
       name: product.name,
       color: variant.color,
       size: variant.size,
-      image: product.image,
+      image: imagesForColor(product.images, variant.color)[0]?.url ?? null,
       unitPrice: product.price,
       maxQuantity: maxQuantityFor(variant.stock),
     });

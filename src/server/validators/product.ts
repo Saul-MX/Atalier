@@ -173,6 +173,9 @@ export const uploadedImagesSchema = z
 
 export type UploadedImage = z.infer<typeof uploadedImagesSchema>[number];
 
+/** Color al que se asigna una foto; null = todos los colores. */
+export const imageColorSchema = z.string().trim().min(1).max(40).nullable();
+
 export const imageMoveSchema = z.object({
   imageId: idSchema,
   direction: z.enum(["up", "down"]),
