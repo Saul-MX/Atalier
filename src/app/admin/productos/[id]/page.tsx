@@ -75,6 +75,12 @@ async function EditProduct({
   const variantsVersion = product.variants
     .map((v) => `${v.id}:${v.stock}:${v.colorHex}`)
     .join("|");
+  // Primera foto de cada color, para la columna «Foto» de la matriz.
+  const colorPhotos: Record<string, string> = {};
+  for (const image of product.images) {
+    if (image.color && !(image.color in colorPhotos))
+      colorPhotos[image.color] = image.url;
+  }
 
   return (
     <div className="flex flex-col gap-10">
@@ -161,6 +167,7 @@ async function EditProduct({
           key={variantsVersion}
           productId={product.id}
           variants={product.variants}
+          colorPhotos={colorPhotos}
         />
       </Section>
 

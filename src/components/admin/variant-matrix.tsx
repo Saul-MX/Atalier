@@ -1,12 +1,18 @@
 "use client";
 
-import { Loader2Icon, PlusIcon, Trash2Icon } from "lucide-react";
+import { ImagePlusIcon, Loader2Icon, PlusIcon, Trash2Icon } from "lucide-react";
 import { useMemo, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-import { saveVariantsAction } from "@/app/admin/productos/actions";
+import {
+  attachImagesAction,
+  getUploadSignatureAction,
+  saveVariantsAction,
+} from "@/app/admin/productos/actions";
+import { ProductImage } from "@/components/shop/product-image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ACCEPTED_IMAGE_TYPES, rejectFile } from "@/lib/catalog/product-images";
 import { SIZE_ORDER } from "@/lib/catalog/sizes";
 import {
   cellKey,
@@ -14,6 +20,8 @@ import {
   matrixFromVariants,
 } from "@/lib/catalog/variant-matrix";
 import { cn } from "@/lib/utils";
+
+import { uploadToCloudinary } from "./upload-to-cloudinary";
 
 type VariantMatrixProps = {
   productId: string;
@@ -23,6 +31,8 @@ type VariantMatrixProps = {
     size: string;
     stock: number;
   }[];
+  /** Primera foto asignada a cada color (nombre → URL). */
+  colorPhotos: Record<string, string>;
 };
 
 type ColorRow = { key: string; name: string; hex: string; saved: boolean };
@@ -35,11 +45,21 @@ const STOCK_PATTERN = /^\d{1,4}$/;
  * celdas que cambiaste y detecta si una venta modificó el stock mientras
  * editabas (ver planVariantChanges).
  *
+ * Cada color guardado tiene su botón «Añadir foto»: la foto se sube a
+ * Cloudinary ya asignada a ese color.
+ *
  * El padre la remonta (prop `key`) cuando cambian los datos del servidor.
  */
-export function VariantMatrix({ productId, variants }: VariantMatrixProps) {
+export function VariantMatrix({
+  productId,
+  variants,
+  colorPhotos,
+}: VariantMatrixProps) {
   const errorRef = useRef<HTMLParagraphElement>(null);
   const tableRef = useRef<HTMLTableElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const photoColor = useRef<string | null>(null);
+  const [uploadingColor, setUploadingColor] = useState<string | null>(null);
   const initial = useMemo(() => matrixFromVariants(variants), [variants]);
   // Stock que vio el admin al cargar: base de la escritura condicional.
   const expected = useMemo(
@@ -141,6 +161,52 @@ export function VariantMatrix({ productId, variants }: VariantMatrixProps) {
     });
   }
 
+  function pickPhoto(color: string) {
+    photoColor.current = color;
+    fileRef.current?.click();
+  }
+
+  async function uploadPhotos(fileList: FileList) {
+    const color = photoColor.current;
+    const files = [...fileList].filter((file) => {
+      const reason = rejectFile(file);
+      if (reason) toast.error(`${file.name}: ${reason}`);
+      return !reason;
+    });
+    if (!color || files.length === 0) return;
+
+    setUploadingColor(color);
+    try {
+      const signed = await getUploadSignatureAction(productId);
+      if (!signed.ok) {
+        toast.error(signed.error);
+        return;
+      }
+      const results = await Promise.allSettled(
+        files.map((file) => uploadToCloudinary(file, signed.upload, () => {})),
+      );
+      const uploads = results.flatMap((r) =>
+        r.status === "fulfilled" ? [r.value] : [],
+      );
+      for (const r of results) {
+        if (r.status === "rejected") toast.error((r.reason as Error).message);
+      }
+      if (uploads.length === 0) return;
+
+      const attached = await attachImagesAction(productId, uploads, color);
+      if (attached.ok)
+        toast.success(
+          attached.added === 1
+            ? `Foto añadida al color ${color}.`
+            : `${attached.added} fotos añadidas al color ${color}.`,
+        );
+      else toast.error(attached.error);
+    } finally {
+      setUploadingColor(null);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
   function reset() {
     setColors(initial.colors.map((c) => ({ ...c, key: c.name, saved: true })));
     setSizes(initial.sizes);
@@ -208,6 +274,9 @@ export function VariantMatrix({ productId, variants }: VariantMatrixProps) {
                 <th scope="col" className="px-3 py-2 text-left font-medium">
                   Color
                 </th>
+                <th scope="col" className="px-2 py-2 text-left font-medium">
+                  Foto
+                </th>
                 {sizes.map((size) => (
                   <th key={size} scope="col" className="px-2 py-2 font-medium">
                     {size}
@@ -268,6 +337,40 @@ export function VariantMatrix({ productId, variants }: VariantMatrixProps) {
                         )}
                       </div>
                     </th>
+                    <td className="px-2 py-2">
+                      <div className="flex items-center gap-2">
+                        <div className="relative h-12 w-9 shrink-0 overflow-hidden bg-muted">
+                          {row.saved && colorPhotos[row.name] && (
+                            <ProductImage
+                              src={colorPhotos[row.name]!}
+                              alt={`Foto del color ${label}`}
+                              sizes="36px"
+                            />
+                          )}
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={!row.saved || uploadingColor !== null}
+                          onClick={() => pickPhoto(row.name)}
+                          className="whitespace-nowrap"
+                        >
+                          {uploadingColor === row.name ? (
+                            <Loader2Icon
+                              className="animate-spin"
+                              aria-hidden="true"
+                            />
+                          ) : (
+                            <ImagePlusIcon aria-hidden="true" />
+                          )}
+                          {uploadingColor === row.name
+                            ? "Subiendo…"
+                            : "Añadir foto"}
+                          <span className="sr-only"> de {label}</span>
+                        </Button>
+                      </div>
+                    </td>
                     {sizes.map((size) => {
                       const value = stockValue(row, size);
                       const invalid = !STOCK_PATTERN.test(value);
@@ -322,7 +425,7 @@ export function VariantMatrix({ productId, variants }: VariantMatrixProps) {
               <tr>
                 <th
                   scope="row"
-                  colSpan={sizes.length + 1}
+                  colSpan={sizes.length + 2}
                   className="px-3 py-2 text-left font-medium"
                 >
                   {colors.length * sizes.length} variante(s)
@@ -335,6 +438,25 @@ export function VariantMatrix({ productId, variants }: VariantMatrixProps) {
             </tfoot>
           </table>
         </div>
+      )}
+
+      <input
+        ref={fileRef}
+        type="file"
+        accept={ACCEPTED_IMAGE_TYPES.join(",")}
+        multiple
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden="true"
+        onChange={(event) => {
+          if (event.target.files) void uploadPhotos(event.target.files);
+        }}
+      />
+      {colors.some((row) => !row.saved) && (
+        <p className="text-xs text-muted-foreground">
+          Escribe el nombre del color nuevo y guarda las variantes; después
+          podrás añadir su foto.
+        </p>
       )}
 
       <div className="flex flex-wrap items-center gap-3">

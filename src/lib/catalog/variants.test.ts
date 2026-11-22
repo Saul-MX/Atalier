@@ -7,6 +7,7 @@ import {
   maxQuantityFor,
   sizeOptionsFor,
   totalStock,
+  withLeadColor,
   type VariantOption,
 } from "./variants";
 
@@ -62,5 +63,37 @@ describe("selector de variantes", () => {
     expect(maxQuantityFor(3)).toBe(3);
     expect(maxQuantityFor(50)).toBe(10);
     expect(maxQuantityFor(-1)).toBe(0);
+  });
+});
+
+describe("withLeadColor (color de la foto principal)", () => {
+  const playera = [
+    v("w-s", "Chalk White", "S", 4),
+    v("w-m", "Chalk White", "M", 2),
+    v("b-s", "Washed Black", "S", 5),
+    v("b-m", "Washed Black", "M", 0),
+  ];
+
+  it("pone primero su muestra y la ficha abre en ese color", () => {
+    const ordered = withLeadColor(playera, "Washed Black");
+    expect(colorOptions(ordered).map((c) => c.name)).toEqual([
+      "Washed Black",
+      "Chalk White",
+    ]);
+    expect(defaultColor(ordered)).toBe("Washed Black");
+  });
+
+  it("si ese color está agotado, abre en el primero con stock", () => {
+    const soldOut = playera.map((x) =>
+      x.color === "Washed Black" ? { ...x, stock: 0 } : x,
+    );
+    const ordered = withLeadColor(soldOut, "Washed Black");
+    expect(colorOptions(ordered)[0]?.name).toBe("Washed Black");
+    expect(defaultColor(ordered)).toBe("Chalk White");
+  });
+
+  it("sin color en la foto o con un color ajeno, no cambia el orden", () => {
+    expect(withLeadColor(playera, null)).toBe(playera);
+    expect(withLeadColor(playera, "Rojo")).toBe(playera);
   });
 });

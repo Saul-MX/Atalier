@@ -162,17 +162,24 @@ export async function getUploadSignatureAction(
 export async function attachImagesAction(
   productId: string,
   uploads: unknown,
+  color: string | null = null,
 ): Promise<ActionResult<{ added: number }>> {
   const denied = await checkAdmin();
   if (denied) return denied;
 
   const id = idSchema.safeParse(productId);
   const images = uploadedImagesSchema.safeParse(uploads);
-  if (!id.success || !images.success) return INVALID;
+  const parsedColor = imageColorSchema.safeParse(color);
+  if (!id.success || !images.success || !parsedColor.success) return INVALID;
 
-  const result = await attachImages(id.data, images.data);
+  const result = await attachImages(id.data, images.data, parsedColor.data);
   if (!result.ok) {
     switch (result.reason) {
+      case "unknown-color":
+        return {
+          ok: false,
+          error: "Ese color ya no existe en las variantes. Recarga la página.",
+        };
       case "invalid-upload":
         return {
           ok: false,

@@ -11,7 +11,7 @@ import { Price } from "@/components/shared/price";
 import { ProductGrid } from "@/components/shop/product-grid";
 import { Skeleton } from "@/components/ui/skeleton";
 import { catalogHref } from "@/lib/catalog/filters";
-import { defaultColor } from "@/lib/catalog/variants";
+import { defaultColor, withLeadColor } from "@/lib/catalog/variants";
 import { publicEnv } from "@/lib/env/public";
 import {
   jsonLd,
@@ -90,6 +90,9 @@ async function ProductDetail({
     inStock: product.variants.some((variant) => variant.stock > 0),
     category: product.category.name,
   });
+  // La ficha abre en el color de la foto principal (la que se ve en el
+  // catálogo) y su muestra va primero.
+  const variants = withLeadColor(product.variants, product.images[0]?.color);
 
   return (
     <div className="flex flex-col gap-6">
@@ -120,7 +123,7 @@ async function ProductDetail({
         </ol>
       </nav>
 
-      <ProductColorProvider initialColor={defaultColor(product.variants) ?? ""}>
+      <ProductColorProvider initialColor={defaultColor(variants) ?? ""}>
         <div className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,3fr)] lg:gap-14">
           <ProductGallery images={product.images} productName={product.name} />
 
@@ -150,7 +153,7 @@ async function ProductDetail({
                 name: product.name,
                 price: product.price,
                 images: product.images,
-                variants: product.variants,
+                variants,
               }}
             />
           </div>

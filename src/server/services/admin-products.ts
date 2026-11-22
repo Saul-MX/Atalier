@@ -334,16 +334,21 @@ export async function canUploadImages(
 
 export type AttachImagesResult =
   | { ok: true; slug: string; added: number }
-  | { ok: false; reason: "not-found" | "invalid-upload" | "too-many" };
+  | {
+      ok: false;
+      reason: "not-found" | "invalid-upload" | "too-many" | "unknown-color";
+    };
 
 /**
  * Registra fotos ya subidas a Cloudinary. Cada una debe venir firmada por
  * Cloudinary y estar en la carpeta del producto. La primera foto real retira
- * los placeholders del seed.
+ * los placeholders del seed. Con `color`, las fotos quedan asignadas a ese
+ * color de variante (subida desde su fila en «Variantes y stock»).
  */
 export async function attachImages(
   productId: string,
   uploads: UploadedImage[],
+  color: string | null = null,
 ): Promise<AttachImagesResult> {
   const folder = `${productFolder(productId)}/`;
   const authentic = uploads.every(
@@ -353,12 +358,24 @@ export async function attachImages(
 
   const product = await prisma.product.findUnique({
     where: { id: productId },
-    select: { slug: true },
+    select: {
+      slug: true,
+      // ¿Existe el color en las variantes? (solo importa si se pidió uno)
+      variants: {
+        where: { color: color ?? "" },
+        take: 1,
+        select: { id: true },
+      },
+    },
   });
   if (!product) {
     // Se borró mientras se subía: no dejar huérfanos en Cloudinary.
     await destroyImages(uploads.map((upload) => upload.publicId));
     return { ok: false, reason: "not-found" };
+  }
+  if (color && product.variants.length === 0) {
+    await destroyImages(uploads.map((upload) => upload.publicId));
+    return { ok: false, reason: "unknown-color" };
   }
 
   const result = await prisma.$transaction(async (tx) => {
@@ -382,6 +399,7 @@ export async function attachImages(
           publicId: upload.publicId,
           url: deliveryUrl(upload.publicId, upload.version, upload.format),
           position: count + fresh.indexOf(upload),
+          color,
         },
       });
     }

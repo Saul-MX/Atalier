@@ -1,4 +1,26 @@
-﻿import { afterAll, beforeEach, describe, expect, it } from "vitest";
+﻿import { createHash } from "node:crypto";
+
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
+
+// Subidas firmadas como lo haría Cloudinary; sin llamadas reales a su API.
+process.env.CLOUDINARY_CLOUD_NAME = "atelier-test";
+process.env.CLOUDINARY_API_KEY = "123456789012345";
+process.env.CLOUDINARY_API_SECRET = "cloudinary-integration-secret";
+vi.mock(import("@/lib/cloudinary"), async (importOriginal) => ({
+  ...(await importOriginal()),
+  destroyImages: vi.fn(async () => {}),
+}));
+
+function signedUpload(productId: string, name: string) {
+  const publicId = `atelier/products/${productId}/${name}`;
+  const version = 1_700_000_000;
+  const signature = createHash("sha1")
+    .update(
+      `public_id=${publicId}&version=${version}${process.env.CLOUDINARY_API_SECRET}`,
+    )
+    .digest("hex");
+  return { publicId, version, signature, format: "jpg" as const };
+}
 
 /**
  * Fotos por color contra Postgres real: asignación desde el admin, limpieza
@@ -6,7 +28,7 @@
  */
 
 const { prisma } = await import("@/lib/prisma");
-const { saveVariants, setImageColor } =
+const { attachImages, saveVariants, setImageColor } =
   await import("@/server/services/admin-products");
 const { reserveOrder } = await import("@/server/services/orders");
 
@@ -89,6 +111,37 @@ describe("fotos por color", () => {
       ok: false,
       reason: "not-found",
     });
+  });
+
+  it("sube una foto desde la fila de un color y queda asignada a él", async () => {
+    const product = await createProduct();
+
+    const result = await attachImages(
+      product.id,
+      [signedUpload(product.id, "beige")],
+      "Blanco",
+    );
+
+    expect(result).toEqual({ ok: true, slug: "playera-boxy", added: 1 });
+    const added = await prisma.productImage.findFirstOrThrow({
+      where: { publicId: { endsWith: "/beige" } },
+    });
+    expect(added).toMatchObject({ color: "Blanco", position: 3 });
+  });
+
+  it("no sube fotos a un color que el producto no tiene", async () => {
+    const product = await createProduct();
+
+    expect(
+      await attachImages(
+        product.id,
+        [signedUpload(product.id, "roja")],
+        "Rojo",
+      ),
+    ).toEqual({ ok: false, reason: "unknown-color" });
+    expect(
+      await prisma.productImage.count({ where: { productId: product.id } }),
+    ).toBe(3);
   });
 
   it("al quitar un color, sus fotos pasan a valer para todos", async () => {

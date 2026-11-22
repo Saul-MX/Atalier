@@ -350,9 +350,9 @@ export function ImageManager({
 
       {images.length > 0 && (
         <p className="text-xs text-muted-foreground">
-          {colors.length > 1
-            ? "Asigna cada foto a su color: en la tienda, al elegir un color se muestran sus fotos. «Todos los colores» sirve para detalles comunes."
-            : "Cuando el producto tenga varios colores en «Variantes y stock», podrás asignar cada foto a su color."}
+          {colors.length > 0
+            ? "Asigna cada foto a su color: en la tienda, al elegir un color se muestran sus fotos, y la ficha abre en el color de la foto principal. «Todos los colores» sirve para detalles comunes."
+            : "Cuando añadas colores en «Variantes y stock», podrás asignar cada foto a su color."}
         </p>
       )}
 
@@ -384,7 +384,7 @@ export function ImageManager({
                     )}
                   </div>
                 </div>
-                {colors.length > 1 && (
+                {colors.length > 0 && (
                   <div className="flex items-center gap-2">
                     <label
                       htmlFor={`image-color-${image.id}`}

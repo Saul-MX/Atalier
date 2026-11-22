@@ -77,6 +77,22 @@ export function defaultColor(variants: VariantOption[]): string | undefined {
   return (options.find((o) => o.available) ?? options[0])?.name;
 }
 
+/**
+ * Pone primero las variantes de `color` (el de la foto principal), sin cambiar
+ * el orden del resto. Así su muestra va primero y `defaultColor` lo elige si
+ * tiene stock: la ficha abre en el color que se ve en la foto.
+ */
+export function withLeadColor<T extends { color: string }>(
+  variants: T[],
+  color: string | null | undefined,
+): T[] {
+  if (!color || !variants.some((v) => v.color === color)) return variants;
+  return [
+    ...variants.filter((v) => v.color === color),
+    ...variants.filter((v) => v.color !== color),
+  ];
+}
+
 export function totalStock(variants: { stock: number }[]): number {
   return variants.reduce((sum, v) => sum + v.stock, 0);
 }
