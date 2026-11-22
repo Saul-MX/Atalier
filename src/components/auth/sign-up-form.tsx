@@ -104,7 +104,7 @@ export function SignUpForm({ next }: { next: string }) {
         required
         error={errors.confirmPassword}
       />
-      <Button type="submit" className="h-10 w-full" disabled={pending}>
+      <Button type="submit" size="cta" className="w-full" disabled={pending}>
         {pending && <Loader2Icon className="animate-spin" aria-hidden="true" />}
         {pending ? "Creando cuenta…" : "Crear cuenta"}
       </Button>

@@ -1,35 +1,30 @@
-import {
-  BanIcon,
-  CircleCheckIcon,
-  ClockIcon,
-  CreditCardIcon,
-  type LucideIcon,
-  TimerOffIcon,
-  TruckIcon,
-} from "lucide-react";
-
 import { Badge } from "@/components/ui/badge";
 import { type OrderStatus } from "@/generated/prisma/enums";
 import { STATUS_LABEL } from "@/lib/orders/status";
+import { cn } from "@/lib/utils";
 
-const STYLE: Record<
-  OrderStatus,
-  { icon: LucideIcon; variant: "default" | "secondary" | "outline" }
-> = {
-  PENDING: { icon: ClockIcon, variant: "outline" },
-  PAID: { icon: CreditCardIcon, variant: "default" },
-  SHIPPED: { icon: TruckIcon, variant: "secondary" },
-  DELIVERED: { icon: CircleCheckIcon, variant: "secondary" },
-  CANCELLED: { icon: BanIcon, variant: "outline" },
-  EXPIRED: { icon: TimerOffIcon, variant: "outline" },
+/**
+ * Relleno negro = en curso; contorno = entregado; tenue = sin efecto.
+ * El estado siempre se lee en el texto (nunca solo por el estilo).
+ */
+const STYLE: Record<OrderStatus, string> = {
+  PENDING: "border-border text-muted-foreground",
+  PAID: "border-primary bg-primary text-primary-foreground",
+  SHIPPED: "border-primary bg-primary text-primary-foreground",
+  DELIVERED: "border-foreground text-foreground",
+  CANCELLED: "border-border text-muted-foreground",
+  EXPIRED: "border-border text-muted-foreground",
 };
 
-/** Estado del pedido: siempre icono + texto (nunca solo color). */
 export function OrderStatusBadge({ status }: { status: OrderStatus }) {
-  const { icon: Icon, variant } = STYLE[status];
   return (
-    <Badge variant={variant}>
-      <Icon data-icon="inline-start" aria-hidden="true" />
+    <Badge
+      variant="outline"
+      className={cn(
+        "h-6 px-2.5 text-[0.625rem] font-normal tracking-[0.12em] uppercase",
+        STYLE[status],
+      )}
+    >
       {STATUS_LABEL[status]}
     </Badge>
   );

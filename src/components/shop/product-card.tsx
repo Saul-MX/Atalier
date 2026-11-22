@@ -24,7 +24,7 @@ export function ProductCard({
 
   return (
     <article className="group relative flex flex-col gap-3">
-      <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-muted">
+      <div className="relative aspect-[3/4] overflow-hidden bg-muted">
         <ProductImage
           src={mainImage}
           alt={product.name}
@@ -45,40 +45,33 @@ export function ProductCard({
           />
         )}
         {!product.inStock && (
-          <Badge variant="secondary" className="absolute top-2 left-2">
+          <Badge
+            variant="outline"
+            className="absolute top-3 left-3 border-foreground bg-background label-caps"
+          >
             Agotado
           </Badge>
         )}
       </div>
 
-      <div className="flex flex-col gap-1">
-        <Heading className="text-sm leading-snug font-medium">
+      <div className="flex flex-col items-center gap-1 text-center">
+        <Heading className="text-[0.8125rem] leading-snug font-normal">
           {/* El enlace cubre toda la tarjeta (::after) sin anidar elementos interactivos. */}
           <Link
             href={`/producto/${product.slug}`}
-            className="after:absolute after:inset-0 after:rounded-md focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-4 focus-visible:after:outline-ring"
+            className="after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-4 focus-visible:after:outline-ring"
           >
             {product.name}
           </Link>
         </Heading>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs text-muted-foreground">
           <Price cents={product.price} />
+          {product.colors.length > 1 && (
+            <span className="sr-only">
+              . Colores: {product.colors.map((c) => c.name).join(", ")}
+            </span>
+          )}
         </p>
-        {product.colors.length > 0 && (
-          <ul className="mt-1 flex items-center gap-1.5">
-            {product.colors.map((color) => (
-              <li key={color.name}>
-                <span
-                  className="block size-3 rounded-full border border-foreground/20"
-                  style={{ backgroundColor: color.hex ?? undefined }}
-                  title={color.name}
-                  aria-hidden="true"
-                />
-                <span className="sr-only">{color.name}</span>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     </article>
   );

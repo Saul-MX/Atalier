@@ -1,6 +1,6 @@
 "use client";
 
-import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { MinusIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Price } from "@/components/shared/price";
@@ -21,7 +21,7 @@ export function CartLineItem({
 
   return (
     <li className="flex gap-4 py-4">
-      <div className="relative aspect-[3/4] w-20 shrink-0 overflow-hidden rounded-md bg-muted">
+      <div className="relative aspect-[3/4] w-20 shrink-0 overflow-hidden bg-muted">
         <ProductImage src={item.image} alt="" sizes="80px" />
       </div>
 
@@ -30,24 +30,24 @@ export function CartLineItem({
           <Link
             href={`/producto/${item.slug}`}
             onClick={onNavigate}
-            className="text-sm leading-snug font-medium hover:underline"
+            className="text-[0.8125rem] leading-snug hover:underline"
           >
             {item.name}
           </Link>
           <Price
             cents={item.unitPrice * item.quantity}
-            className="shrink-0 text-sm"
+            className="shrink-0 text-[0.8125rem]"
           />
         </div>
         <p className="text-xs text-muted-foreground">
-          {item.color} · Talla {item.size}
+          Color: {item.color} · Talla: {item.size}
         </p>
 
         <div className="mt-auto flex items-center justify-between pt-2">
           <div
             role="group"
             aria-label={`Cantidad de ${item.name}`}
-            className="flex items-center rounded-md border"
+            className="flex items-center border"
           >
             <Button
               variant="ghost"
@@ -79,13 +79,12 @@ export function CartLineItem({
           </div>
 
           <Button
-            variant="ghost"
+            variant="link"
             size="sm"
             onClick={() => removeItem(item.variantId)}
             aria-label={`Eliminar ${item.name} del carrito`}
-            className="text-muted-foreground"
+            className="h-auto px-0 text-xs text-muted-foreground underline"
           >
-            <Trash2Icon aria-hidden="true" />
             Eliminar
           </Button>
         </div>

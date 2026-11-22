@@ -28,6 +28,7 @@ model Category {
   id       String    @id @default(cuid())
   name     String
   slug     String    @unique
+  position Int       @default(0) // orden en la navegación
   products Product[]
 }
 

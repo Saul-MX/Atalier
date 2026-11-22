@@ -1,6 +1,5 @@
 "use client";
 
-import { CheckIcon, ShoppingBagIcon } from "lucide-react";
 import { useId, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -104,9 +103,7 @@ export function ProductPurchase({ product }: { product: PurchaseProduct }) {
   return (
     <div className="flex flex-col gap-6">
       <fieldset>
-        <legend className="mb-3 text-sm">
-          Color: <span className="font-medium">{color}</span>
-        </legend>
+        <legend className="mb-3 label-caps">Color: {color}</legend>
         <div className="flex flex-wrap gap-3">
           {colors.map((option) => {
             const inputId = `${id}-color-${option.name}`;
@@ -127,7 +124,7 @@ export function ProductPurchase({ product }: { product: PurchaseProduct }) {
                     option.available ? option.name : `${option.name} (agotado)`
                   }
                   className={cn(
-                    "relative flex size-9 cursor-pointer items-center justify-center rounded-full border-2 border-transparent p-0.5 peer-checked:border-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring",
+                    "relative flex size-8 cursor-pointer items-center justify-center rounded-full border border-transparent p-0.5 peer-checked:border-primary peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring",
                     !option.available && "opacity-60",
                   )}
                 >
@@ -139,7 +136,7 @@ export function ProductPurchase({ product }: { product: PurchaseProduct }) {
                   {!option.available && (
                     <span
                       aria-hidden="true"
-                      className="absolute h-0.5 w-9 rotate-45 bg-foreground/60"
+                      className="absolute h-px w-8 rotate-45 bg-foreground/60"
                     />
                   )}
                   <span className="sr-only">
@@ -165,9 +162,8 @@ export function ProductPurchase({ product }: { product: PurchaseProduct }) {
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
         >
-          <legend className="mb-3 text-sm">
-            Talla{size ? ": " : ""}
-            {size && <span className="font-medium">{size}</span>}
+          <legend className="mb-3 label-caps">
+            Talla{size ? `: ${size}` : ""}
           </legend>
           <div className="flex flex-wrap gap-2">
             {sizes.map((option) => {
@@ -190,7 +186,7 @@ export function ProductPurchase({ product }: { product: PurchaseProduct }) {
                   <label
                     htmlFor={inputId}
                     className={cn(
-                      "flex h-11 min-w-12 cursor-pointer items-center justify-center rounded-md border px-3 text-sm peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring hover:border-foreground/50",
+                      "flex h-11 min-w-14 cursor-pointer items-center justify-center border px-3 text-xs peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-foreground peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring hover:border-foreground/50",
                       "peer-disabled:cursor-not-allowed peer-disabled:text-muted-foreground peer-disabled:line-through peer-disabled:hover:border-border",
                     )}
                   >
@@ -232,31 +228,18 @@ export function ProductPurchase({ product }: { product: PurchaseProduct }) {
       </div>
 
       <Button
-        size="lg"
-        className="h-12 w-full text-base"
+        size="cta"
+        className="h-12 w-full"
         onClick={add}
         disabled={soldOut || colorSoldOut}
       >
-        {soldOut ? (
-          "Agotado"
-        ) : (
-          <>
-            <ShoppingBagIcon aria-hidden="true" />
-            Añadir al carrito
-          </>
-        )}
+        {soldOut ? "Agotado" : "Añadir al carrito"}
       </Button>
 
-      <ul className="flex flex-col gap-1.5 text-sm text-muted-foreground">
-        <li className="flex items-center gap-2">
-          <CheckIcon className="size-4" aria-hidden="true" />
-          Envío gratis desde {formatPrice(FREE_SHIPPING_THRESHOLD)}
-        </li>
-        <li className="flex items-center gap-2">
-          <CheckIcon className="size-4" aria-hidden="true" />
-          Pago seguro con Stripe
-        </li>
-      </ul>
+      <p className="text-xs text-muted-foreground">
+        Envío gratis desde {formatPrice(FREE_SHIPPING_THRESHOLD)} · Pago seguro
+        con Stripe · Precios con IVA incluido
+      </p>
     </div>
   );
 }

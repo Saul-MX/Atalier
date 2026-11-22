@@ -95,8 +95,8 @@ export function CheckoutButton() {
         </p>
       )}
       <Button
-        size="lg"
-        className="h-11 w-full"
+        size="cta"
+        className="h-12 w-full"
         disabled={pending || items.length === 0}
         onClick={checkout}
       >

@@ -1,4 +1,3 @@
-import { ArrowRightIcon, LockIcon, ReceiptIcon, TruckIcon } from "lucide-react";
 import { type Metadata } from "next";
 import Link from "next/link";
 
@@ -40,10 +39,9 @@ function websiteJsonLd() {
 
 export default async function HomePage() {
   const [newArrivals, collections] = await Promise.all([
-    getNewArrivals(8),
+    getNewArrivals(4),
     getCategoryHighlights(),
   ]);
-  const [heroA, heroB] = newArrivals;
 
   return (
     <>
@@ -51,115 +49,65 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd(websiteJsonLd()) }}
       />
-      {/* Hero editorial */}
-      <section aria-labelledby="hero-title" className="border-b">
-        <Container className="grid items-center gap-10 py-12 md:grid-cols-2 md:py-20">
-          <div className="flex flex-col gap-6">
-            <p className="text-xs font-medium tracking-[0.3em] text-muted-foreground uppercase">
-              Nueva temporada
-            </p>
-            <h1
-              id="hero-title"
-              className="text-4xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-5xl lg:text-6xl"
-            >
-              Siluetas esenciales, materiales que permanecen.
-            </h1>
-            <p className="max-w-md text-base text-pretty text-muted-foreground">
-              Lana, lino, seda y piel en una paleta serena. Prendas pensadas
-              para combinarse entre sí durante muchas temporadas.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Button asChild size="lg" className="h-11 px-5">
-                <Link href="/catalogo">
-                  Explorar la colección
-                  <ArrowRightIcon aria-hidden="true" />
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="h-11 px-5">
-                <Link href="#novedades">Ver novedades</Link>
-              </Button>
-            </div>
-          </div>
-
-          {heroA && (
-            <div className="grid grid-cols-2 gap-4" aria-hidden="true">
-              <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-muted">
-                <ProductImage
-                  src={heroA.images[0]}
-                  alt=""
-                  sizes="(min-width: 768px) 25vw, 50vw"
-                  priority
-                />
-              </div>
-              {heroB && (
-                <div className="relative mt-12 aspect-[3/4] overflow-hidden rounded-md bg-muted">
-                  <ProductImage
-                    src={heroB.images[0]}
-                    alt=""
-                    sizes="(min-width: 768px) 25vw, 50vw"
-                    priority
-                  />
-                </div>
-              )}
-            </div>
-          )}
+      {/* Hero */}
+      <section aria-labelledby="hero-title" className="bg-muted">
+        <Container className="flex min-h-[26rem] flex-col items-center justify-center gap-5 py-20 text-center md:min-h-[40rem]">
+          <p className="label-caps text-muted-foreground">
+            Colección otoño / invierno 26
+          </p>
+          <h1
+            id="hero-title"
+            className="pl-[0.3em] text-4xl font-normal display-caps sm:text-5xl lg:text-[4rem]"
+          >
+            Esenciales
+          </h1>
+          <p className="max-w-md text-[0.8125rem] text-pretty text-muted-foreground">
+            Prendas atemporales, cortes limpios y accesorios en plata. Envío
+            gratis desde {formatPrice(FREE_SHIPPING_THRESHOLD)}.
+          </p>
+          <Button asChild size="cta" className="mt-2">
+            <Link href="/catalogo">Ver colección</Link>
+          </Button>
         </Container>
       </section>
 
-      {/* Ventajas */}
-      <section aria-label="Ventajas de comprar en ATELIER" className="border-b">
-        <Container>
-          <ul className="grid gap-4 py-6 text-sm sm:grid-cols-3">
-            <li className="flex items-center gap-3">
-              <TruckIcon className="size-5 shrink-0" aria-hidden="true" />
-              Envío gratis desde {formatPrice(FREE_SHIPPING_THRESHOLD)}
-            </li>
-            <li className="flex items-center gap-3">
-              <LockIcon className="size-5 shrink-0" aria-hidden="true" />
-              Pago seguro con Stripe
-            </li>
-            <li className="flex items-center gap-3">
-              <ReceiptIcon className="size-5 shrink-0" aria-hidden="true" />
-              Precios con IVA incluido
-            </li>
-          </ul>
-        </Container>
-      </section>
-
-      {/* Colecciones */}
-      <section aria-labelledby="colecciones" className="py-16">
-        <Container className="flex flex-col gap-8">
+      {/* Categorías */}
+      <section aria-labelledby="colecciones" className="pt-24">
+        <Container className="flex flex-col gap-10">
           <h2
             id="colecciones"
-            className="text-2xl font-semibold tracking-tight"
+            className="text-center text-base display-caps tracking-[0.15em]"
           >
-            Colecciones
+            Compra por categoría
           </h2>
           {collections.length === 0 ? (
             <EmptyState
-              title="Aún no hay colecciones"
+              title="Aún no hay categorías"
               description="Vuelve pronto: estamos preparando la nueva temporada."
               headingLevel="h3"
             />
           ) : (
-            <ul className="grid grid-cols-2 gap-4 md:grid-cols-3">
-              {collections.map((collection) => (
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-4 lg:gap-x-6">
+              {collections.map((collection, index) => (
                 <li key={collection.slug}>
                   <Link
                     href={catalogHref({ category: collection.slug })}
-                    className="group relative flex aspect-[4/5] items-end overflow-hidden rounded-md bg-muted"
+                    className="group flex flex-col gap-3"
                   >
-                    <ProductImage
-                      src={collection.image}
-                      alt=""
-                      sizes="(min-width: 768px) 33vw, 50vw"
-                      className="transition duration-700 ease-out group-hover:scale-[1.03]"
-                    />
-                    <span className="relative m-3 flex w-[calc(100%-1.5rem)] items-center justify-between rounded-md bg-background/90 px-3 py-2 text-sm backdrop-blur">
-                      <span className="font-medium">{collection.name}</span>
-                      <span className="text-muted-foreground">
-                        {collection.productCount}
-                        <span className="sr-only"> productos</span>
+                    <span className="relative block aspect-[3/4] overflow-hidden bg-muted">
+                      <ProductImage
+                        src={collection.image}
+                        alt=""
+                        sizes="(min-width: 1024px) 25vw, 50vw"
+                        priority={index < 2}
+                        className="transition duration-700 ease-out group-hover:scale-[1.03]"
+                      />
+                    </span>
+                    <span className="text-center label-caps underline-offset-4 group-hover:underline">
+                      {collection.name}
+                      <span className="sr-only">
+                        {" "}
+                        ({collection.productCount} productos)
                       </span>
                     </span>
                   </Link>
@@ -174,23 +122,15 @@ export default async function HomePage() {
       <section
         id="novedades"
         aria-labelledby="novedades-title"
-        className="scroll-mt-20 pb-8"
+        className="scroll-mt-24 pt-24"
       >
-        <Container className="flex flex-col gap-8">
-          <div className="flex items-end justify-between gap-4">
-            <h2
-              id="novedades-title"
-              className="text-2xl font-semibold tracking-tight"
-            >
-              Novedades
-            </h2>
-            <Button asChild variant="link" className="px-0">
-              <Link href="/catalogo">
-                Ver todo
-                <ArrowRightIcon aria-hidden="true" />
-              </Link>
-            </Button>
-          </div>
+        <Container className="flex flex-col items-center gap-10">
+          <h2
+            id="novedades-title"
+            className="text-center text-base display-caps tracking-[0.15em]"
+          >
+            Novedades
+          </h2>
           {newArrivals.length === 0 ? (
             <EmptyState
               title="Todavía no hay productos"
@@ -198,8 +138,20 @@ export default async function HomePage() {
               headingLevel="h3"
             />
           ) : (
-            <ProductGrid products={newArrivals} headingLevel="h3" />
+            <ProductGrid
+              products={newArrivals}
+              headingLevel="h3"
+              className="w-full"
+            />
           )}
+          <Button
+            asChild
+            variant="outline"
+            size="cta"
+            className="border-foreground px-8"
+          >
+            <Link href="/catalogo">Ver todo</Link>
+          </Button>
         </Container>
       </section>
     </>

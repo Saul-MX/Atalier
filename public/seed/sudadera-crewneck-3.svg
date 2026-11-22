@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1200" width="900" height="1200" role="img" aria-label="Sudadera crewneck — Verde oliva">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0.06"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="1200" fill="#6B6B3A"/>
+  <rect width="900" height="1200" fill="url(#g)"/>
+</svg>

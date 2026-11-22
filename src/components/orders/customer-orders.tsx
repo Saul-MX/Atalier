@@ -26,7 +26,7 @@ export function CustomerOrders({ orders }: { orders: CustomerOrder[] }) {
         description="Cuando completes una compra, podrás seguir su estado aquí."
         headingLevel="h3"
         action={
-          <Button asChild>
+          <Button asChild size="cta">
             <Link href="/catalogo">Explorar el catálogo</Link>
           </Button>
         }
@@ -38,13 +38,10 @@ export function CustomerOrders({ orders }: { orders: CustomerOrder[] }) {
     <ol className="flex flex-col gap-4">
       {orders.map((order) => (
         <li key={order.id}>
-          <article
-            aria-labelledby={`pedido-${order.id}`}
-            className="rounded-lg border"
-          >
+          <article aria-labelledby={`pedido-${order.id}`} className="border">
             <header className="flex flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
               <div className="flex flex-col">
-                <h3 id={`pedido-${order.id}`} className="font-medium">
+                <h3 id={`pedido-${order.id}`} className="text-sm font-medium">
                   Pedido {orderNumber(order.id)}
                 </h3>
                 <p className="text-xs text-muted-foreground">
@@ -54,7 +51,7 @@ export function CustomerOrders({ orders }: { orders: CustomerOrder[] }) {
               </div>
               <OrderStatusBadge status={order.status} />
             </header>
-            <ul className="divide-y text-sm">
+            <ul className="divide-y text-[0.8125rem]">
               {order.items.map((item) => (
                 <li
                   key={item.id}
@@ -76,7 +73,7 @@ export function CustomerOrders({ orders }: { orders: CustomerOrder[] }) {
                 </li>
               ))}
             </ul>
-            <dl className="flex flex-wrap justify-end gap-x-6 gap-y-1 border-t px-4 py-3 text-sm">
+            <dl className="flex flex-wrap justify-end gap-x-6 gap-y-1 border-t bg-muted px-4 py-3 text-[0.8125rem]">
               <div className="flex gap-2">
                 <dt className="text-muted-foreground">Envío</dt>
                 <dd>

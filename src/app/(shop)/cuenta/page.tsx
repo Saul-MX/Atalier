@@ -33,14 +33,14 @@ async function AccountContent() {
 
   return (
     <div className="flex flex-col gap-10">
-      <header className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-semibold tracking-tight">Mi cuenta</h1>
-          <p className="text-sm text-muted-foreground">
-            {user.name} · {user.email}
-          </p>
-        </div>
-        <div className="flex gap-2">
+      <header className="flex flex-col items-center gap-4 text-center">
+        <h1 className="pl-[0.3em] text-2xl font-normal display-caps sm:text-[1.75rem]">
+          Mi cuenta
+        </h1>
+        <p className="text-xs text-muted-foreground">
+          {user.name} · {user.email}
+        </p>
+        <div className="flex flex-wrap justify-center gap-2">
           {isAdminRole(user.role) && (
             <Button asChild variant="outline">
               <Link href="/admin">Panel de administración</Link>
@@ -51,7 +51,7 @@ async function AccountContent() {
       </header>
 
       <section aria-labelledby="pedidos" className="flex flex-col gap-4">
-        <h2 id="pedidos" className="text-xl font-semibold tracking-tight">
+        <h2 id="pedidos" className="border-b pb-3 label-caps font-medium">
           Mis pedidos
         </h2>
         <CustomerOrders orders={orders} />
@@ -67,7 +67,7 @@ function AccountSkeleton() {
       role="status"
       aria-label="Cargando cuenta"
     >
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col items-center gap-2">
         <Skeleton className="h-9 w-48" />
         <Skeleton className="h-4 w-64" />
       </div>

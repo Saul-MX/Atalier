@@ -53,7 +53,7 @@ export function GoogleButton({ next }: { next: string }) {
       <Button
         type="button"
         variant="outline"
-        className="h-10 w-full"
+        className="h-11 w-full"
         onClick={signIn}
         disabled={pending}
       >

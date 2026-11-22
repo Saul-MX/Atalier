@@ -15,7 +15,7 @@ export function FreeShippingBar({
 
   return (
     <div className={cn("flex flex-col gap-2", className)}>
-      <p className="flex items-center gap-2 text-sm" aria-live="polite">
+      <p className="flex items-center gap-2 text-xs" aria-live="polite">
         <TruckIcon className="size-4 shrink-0" aria-hidden="true" />
         {qualifies ? (
           <span className="font-medium">¡Tu pedido tiene envío gratis!</span>
@@ -33,11 +33,11 @@ export function FreeShippingBar({
         aria-valuemax={100}
         aria-valuenow={percent}
         aria-valuetext={`${percent} %`}
-        className="h-1.5 w-full overflow-hidden rounded-full bg-muted"
+        className="h-0.5 w-full overflow-hidden bg-border"
       >
         <div
           className={cn(
-            "h-full rounded-full bg-primary transition-[width] duration-500 ease-out",
+            "h-full bg-primary transition-[width] duration-500 ease-out",
             qualifies && "bg-success",
           )}
           style={{ width: `${percent}%` }}

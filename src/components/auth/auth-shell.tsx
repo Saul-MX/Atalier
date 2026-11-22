@@ -14,8 +14,12 @@ export function AuthShell({
     <Container className="flex justify-center py-12 sm:py-20">
       <div className="flex w-full max-w-sm flex-col gap-6">
         <header className="flex flex-col gap-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-          <p className="text-sm text-muted-foreground">{description}</p>
+          <h1 className="pl-[0.3em] text-xl font-normal display-caps">
+            {title}
+          </h1>
+          <p className="text-[0.8125rem] text-muted-foreground">
+            {description}
+          </p>
         </header>
         {children}
       </div>

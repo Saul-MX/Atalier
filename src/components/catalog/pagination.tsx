@@ -1,11 +1,11 @@
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import Link from "next/link";
 
 import { type CatalogFilters, catalogHref } from "@/lib/catalog/filters";
 import { cn } from "@/lib/utils";
 
 const itemClass =
-  "flex h-9 min-w-9 items-center justify-center gap-1 rounded-md border px-3 text-sm hover:bg-muted";
+  "flex h-9 min-w-7 items-center justify-center gap-1 px-1 label-caps underline-offset-4 hover:underline";
 
 export function Pagination({
   filters,
@@ -20,12 +20,12 @@ export function Pagination({
   const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
 
   return (
-    <nav aria-label="Paginación" className="flex justify-center">
-      <ul className="flex flex-wrap items-center gap-2">
+    <nav aria-label="Paginación" className="flex justify-center pt-10">
+      <ul className="flex flex-wrap items-center gap-3">
         <li>
           {current > 1 ? (
             <Link href={href(current - 1)} className={itemClass}>
-              <ChevronLeftIcon className="size-4" aria-hidden="true" />
+              <ArrowLeftIcon className="size-3" aria-hidden="true" />
               Anterior
             </Link>
           ) : (
@@ -33,7 +33,7 @@ export function Pagination({
               className={cn(itemClass, "pointer-events-none opacity-40")}
               aria-disabled="true"
             >
-              <ChevronLeftIcon className="size-4" aria-hidden="true" />
+              <ArrowLeftIcon className="size-3" aria-hidden="true" />
               Anterior
             </span>
           )}
@@ -46,8 +46,7 @@ export function Pagination({
               aria-label={`Página ${page}`}
               className={cn(
                 itemClass,
-                page === current &&
-                  "border-primary bg-primary text-primary-foreground hover:bg-primary",
+                page === current ? "underline" : "text-muted-foreground",
               )}
             >
               {page}
@@ -58,7 +57,7 @@ export function Pagination({
           {current < pageCount ? (
             <Link href={href(current + 1)} className={itemClass}>
               Siguiente
-              <ChevronRightIcon className="size-4" aria-hidden="true" />
+              <ArrowRightIcon className="size-3" aria-hidden="true" />
             </Link>
           ) : (
             <span
@@ -66,7 +65,7 @@ export function Pagination({
               aria-disabled="true"
             >
               Siguiente
-              <ChevronRightIcon className="size-4" aria-hidden="true" />
+              <ArrowRightIcon className="size-3" aria-hidden="true" />
             </span>
           )}
         </li>

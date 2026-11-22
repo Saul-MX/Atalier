@@ -13,42 +13,35 @@ export async function SiteHeader() {
   const categories = await getCategories();
 
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur supports-backdrop-filter:bg-background/75">
-      <Container className="flex h-16 items-center gap-2">
-        <MobileNav categories={categories} />
+    <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/85">
+      <Container className="grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-4 lg:h-[4.75rem]">
+        <div className="flex items-center">
+          <MobileNav categories={categories} />
+          <nav aria-label="Principal" className="hidden lg:block">
+            <ul className="flex items-center gap-7 label-caps">
+              {categories.map((category) => (
+                <li key={category.slug}>
+                  <Link
+                    href={catalogHref({ category: category.slug })}
+                    className="underline-offset-4 hover:underline"
+                  >
+                    {category.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </div>
 
         <Link
           href="/"
-          className="mr-4 text-lg font-semibold tracking-[0.3em]"
+          className="pl-[0.3em] text-lg display-caps lg:text-[1.375rem]"
           aria-label="ATELIER, ir al inicio"
         >
           ATELIER
         </Link>
 
-        <nav aria-label="Principal" className="hidden flex-1 lg:block">
-          <ul className="flex items-center gap-6 text-sm">
-            <li>
-              <Link
-                href="/catalogo"
-                className="font-medium underline-offset-8 hover:underline"
-              >
-                Ver todo
-              </Link>
-            </li>
-            {categories.map((category) => (
-              <li key={category.slug}>
-                <Link
-                  href={catalogHref({ category: category.slug })}
-                  className="text-muted-foreground underline-offset-8 hover:text-foreground hover:underline"
-                >
-                  {category.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-
-        <div className="ml-auto flex items-center gap-1">
+        <div className="flex items-center justify-end sm:gap-1 lg:gap-6">
           <SearchLauncher />
           <UserMenu />
           <CartButton />

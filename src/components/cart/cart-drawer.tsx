@@ -50,7 +50,9 @@ export function CartDrawer() {
         }}
       >
         <SheetHeader className="border-b">
-          <SheetTitle>Tu carrito</SheetTitle>
+          <SheetTitle className="text-sm font-normal display-caps tracking-[0.2em]">
+            Tu carrito
+          </SheetTitle>
           <SheetDescription>
             {hasHydrated
               ? count === 0
@@ -64,7 +66,7 @@ export function CartDrawer() {
           <div className="flex flex-col gap-4 p-4" aria-hidden="true">
             {Array.from({ length: 2 }, (_, i) => (
               <div key={i} className="flex gap-4">
-                <Skeleton className="aspect-[3/4] w-20 rounded-md" />
+                <Skeleton className="aspect-[3/4] w-20" />
                 <div className="flex flex-1 flex-col gap-2">
                   <Skeleton className="h-4 w-3/4" />
                   <Skeleton className="h-3 w-1/3" />
@@ -81,7 +83,7 @@ export function CartDrawer() {
               headingLevel="h3"
               className="w-full border-none"
               action={
-                <Button asChild>
+                <Button asChild size="cta">
                   <Link href="/catalogo" onClick={close}>
                     Ver catálogo
                   </Link>
@@ -103,11 +105,12 @@ export function CartDrawer() {
                 />
               ))}
             </ul>
-            <SheetFooter className="gap-3 border-t">
-              <dl className="flex items-center justify-between text-sm">
-                <dt className="font-medium">Subtotal</dt>
+            <SheetFooter className="gap-3 border-t bg-muted">
+              <h3 className="label-caps font-medium">Resumen del pedido</h3>
+              <dl className="flex items-center justify-between text-[0.8125rem]">
+                <dt className="text-muted-foreground">Subtotal</dt>
                 <dd>
-                  <Price cents={subtotal} className="font-medium" />
+                  <Price cents={subtotal} />
                 </dd>
               </dl>
               <p className="text-xs text-muted-foreground">

@@ -34,7 +34,7 @@ async function seedCategories(): Promise<Map<string, string>> {
     const { id } = await prisma.category.upsert({
       where: { slug: category.slug },
       create: category,
-      update: { name: category.name },
+      update: { name: category.name, position: category.position },
     });
     ids.set(category.slug, id);
   }
@@ -117,6 +117,34 @@ async function seedProducts(categoryIds: Map<string, string>) {
   return variantCount;
 }
 
+/**
+ * Retira lo que ya no está en el catálogo de demo (p. ej. tras cambiar las
+ * categorías). Los productos con pedidos no se pueden borrar (los pedidos
+ * conservan sus líneas), así que se desactivan; las categorías se borran
+ * cuando se quedan vacías. Los productos creados desde el admin también se
+ * retiran: el seed define el catálogo de la demo.
+ */
+async function retireStaleCatalog() {
+  const seedSlugs = PRODUCTS.map((product) => product.slug);
+  const stale = { slug: { notIn: seedSlugs } };
+
+  const { count: deleted } = await prisma.product.deleteMany({
+    where: { ...stale, variants: { none: { orderItems: { some: {} } } } },
+  });
+  const { count: deactivated } = await prisma.product.updateMany({
+    where: { ...stale, active: true },
+    data: { active: false },
+  });
+  const { count: categories } = await prisma.category.deleteMany({
+    where: {
+      slug: { notIn: CATEGORIES.map((category) => category.slug) },
+      products: { none: {} },
+    },
+  });
+
+  return { deleted, deactivated, categories };
+}
+
 async function seedAdmin(email: string, password: string) {
   const existing = await prisma.user.findUnique({ where: { email } });
 
@@ -149,6 +177,7 @@ async function main() {
 
   const categoryIds = await seedCategories();
   const variantCount = await seedProducts(categoryIds);
+  const retired = await retireStaleCatalog();
   const adminStatus = await seedAdmin(
     seedEnv.data.SEED_ADMIN_EMAIL,
     seedEnv.data.SEED_ADMIN_PASSWORD,
@@ -156,6 +185,9 @@ async function main() {
 
   console.log(
     `✓ ${categoryIds.size} categorías, ${PRODUCTS.length} productos, ${variantCount} variantes`,
+  );
+  console.log(
+    `✓ Catálogo anterior: ${retired.deleted} productos borrados, ${retired.deactivated} desactivados (tienen pedidos), ${retired.categories} categorías borradas`,
   );
   console.log(`✓ Admin ${seedEnv.data.SEED_ADMIN_EMAIL}: ${adminStatus}`);
 }

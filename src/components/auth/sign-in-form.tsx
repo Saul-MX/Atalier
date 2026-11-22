@@ -84,7 +84,7 @@ export function SignInForm({ next }: { next: string }) {
         required
         error={errors.password}
       />
-      <Button type="submit" className="h-10 w-full" disabled={pending}>
+      <Button type="submit" size="cta" className="w-full" disabled={pending}>
         {pending && <Loader2Icon className="animate-spin" aria-hidden="true" />}
         {pending ? "Entrando…" : "Iniciar sesión"}
       </Button>

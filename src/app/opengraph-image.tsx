@@ -15,21 +15,21 @@ export default function OpenGraphImage() {
         flexDirection: "column",
         justifyContent: "space-between",
         padding: 72,
-        background: "#F7F4EE",
-        color: "#191714",
+        background: "#F4F3F0",
+        color: "#111111",
       }}
     >
       <div
         style={{ fontSize: 28, letterSpacing: 12, textTransform: "uppercase" }}
       >
-        Nueva temporada
+        Colección otoño / invierno 26
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-        <div style={{ fontSize: 144, letterSpacing: 36, fontWeight: 600 }}>
+        <div style={{ fontSize: 144, letterSpacing: 36, fontWeight: 400 }}>
           ATELIER
         </div>
-        <div style={{ fontSize: 40, color: "#6B6762" }}>
-          Siluetas esenciales y materiales nobles.
+        <div style={{ fontSize: 40, color: "#6B6B6B" }}>
+          Prendas atemporales, cortes limpios y accesorios en plata.
         </div>
       </div>
       <div
@@ -37,7 +37,7 @@ export default function OpenGraphImage() {
           display: "flex",
           justifyContent: "space-between",
           fontSize: 28,
-          color: "#6B6762",
+          color: "#6B6B6B",
         }}
       >
         <span>Envío gratis desde $1,500 MXN</span>

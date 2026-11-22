@@ -99,7 +99,7 @@ export async function listAdminProducts(filters: {
 export async function getCategoryOptions() {
   return prisma.category.findMany({
     select: { id: true, name: true },
-    orderBy: { name: "asc" },
+    orderBy: [{ position: "asc" }, { name: "asc" }],
   });
 }
 

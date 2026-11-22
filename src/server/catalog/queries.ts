@@ -72,9 +72,11 @@ export async function getCategories(): Promise<CategorySummary[]> {
   cacheLife("hours");
   cacheTag(CATALOG_TAG);
 
+  // Solo categorías con productos a la venta (las retiradas no se enlazan).
   return prisma.category.findMany({
+    where: { products: { some: { active: true } } },
     select: { name: true, slug: true },
-    orderBy: { name: "asc" },
+    orderBy: [{ position: "asc" }, { name: "asc" }],
   });
 }
 
@@ -84,14 +86,16 @@ export async function getCategoryHighlights(): Promise<CategoryHighlight[]> {
   cacheTag(CATALOG_TAG);
 
   const categories = await prisma.category.findMany({
-    orderBy: { name: "asc" },
+    orderBy: [{ position: "asc" }, { name: "asc" }],
     select: {
       name: true,
       slug: true,
       _count: { select: { products: { where: { active: true } } } },
+      // La imagen de la categoría es su producto más antiguo, para no repetir
+      // las de "Novedades" en la home.
       products: {
         where: { active: true },
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: "asc" },
         take: 1,
         select: {
           images: { orderBy: imageOrder, take: 1, select: { url: true } },

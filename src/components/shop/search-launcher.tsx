@@ -6,6 +6,12 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { lazyWithPreload } from "@/lib/lazy";
 
+import {
+  HEADER_ACTION_CLASS,
+  HEADER_ICON_CLASS,
+  HEADER_LABEL_CLASS,
+} from "./header-action";
+
 const SearchDialog = lazyWithPreload(() =>
   import("./search-dialog").then((m) => m.SearchDialog),
 );
@@ -42,14 +48,17 @@ export function SearchLauncher() {
       <Button
         ref={buttonRef}
         variant="ghost"
-        size="icon-lg"
+        className={HEADER_ACTION_CLASS}
         aria-label="Buscar productos"
         aria-haspopup="dialog"
         onPointerEnter={SearchDialog.preload}
         onFocus={SearchDialog.preload}
         onClick={() => show(true)}
       >
-        <SearchIcon aria-hidden="true" />
+        <SearchIcon aria-hidden="true" className={HEADER_ICON_CLASS} />
+        <span aria-hidden="true" className={HEADER_LABEL_CLASS}>
+          Buscar
+        </span>
       </Button>
       {requested && (
         <Suspense fallback={null}>

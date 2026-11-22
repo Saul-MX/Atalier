@@ -5,7 +5,7 @@ export const SITE = {
   name: "ATELIER",
   title: "ATELIER — Moda contemporánea",
   description:
-    "Moda contemporánea con siluetas esenciales y materiales nobles: abrigos, camisas, punto, pantalones, vestidos y accesorios. Envío gratis desde $1,500 MXN.",
+    "Ropa esencial y accesorios para mujer y hombre: prendas atemporales, gorras y joyería en plata 925. Envío gratis desde $1,500 MXN.",
   locale: "es_MX",
 } as const;
 

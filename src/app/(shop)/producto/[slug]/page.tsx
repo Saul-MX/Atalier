@@ -90,13 +90,13 @@ async function ProductDetail({
   });
 
   return (
-    <div className="flex flex-col gap-16">
+    <div className="flex flex-col gap-6">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLd(structuredData) }}
       />
       <nav aria-label="Ruta de navegación">
-        <ol className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+        <ol className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
           <li>
             <Link href="/" className="hover:text-foreground">
               Inicio
@@ -113,29 +113,28 @@ async function ProductDetail({
           </li>
           <li aria-hidden="true">/</li>
           <li>
-            <span aria-current="page" className="text-foreground">
-              {product.name}
-            </span>
+            <span aria-current="page">{product.name}</span>
           </li>
         </ol>
       </nav>
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-16">
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,3fr)] lg:gap-14">
         <ProductGallery images={product.images} productName={product.name} />
 
-        <div className="flex flex-col gap-8 lg:sticky lg:top-24 lg:self-start">
-          <header className="flex flex-col gap-3">
-            <p className="text-xs tracking-[0.2em] text-muted-foreground uppercase">
+        <div className="flex flex-col gap-7 lg:sticky lg:top-28 lg:self-start">
+          <header className="flex flex-col gap-2">
+            <p className="text-[0.625rem] tracking-[0.2em] text-muted-foreground uppercase">
               {product.category.name}
             </p>
-            <h1 className="text-3xl font-semibold tracking-tight text-balance">
-              {product.name}
-            </h1>
-            <p className="text-xl">
-              <Price cents={product.price} />
-              <span className="ml-2 text-sm text-muted-foreground">
-                IVA incluido
-              </span>
+            <h1 className="text-xl font-normal text-balance">{product.name}</h1>
+            <p className="text-sm">
+              <Price cents={product.price} /> MXN
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Impuestos incluidos. Envío calculado al pagar.
+            </p>
+            <p className="mt-3 text-[0.8125rem] leading-relaxed text-pretty text-muted-foreground">
+              {product.description}
             </p>
           </header>
 
@@ -149,25 +148,19 @@ async function ProductDetail({
               variants: product.variants,
             }}
           />
-
-          <section aria-labelledby="descripcion" className="border-t pt-6">
-            <h2 id="descripcion" className="mb-2 text-sm font-medium">
-              Descripción
-            </h2>
-            <p className="text-sm leading-relaxed text-pretty text-muted-foreground">
-              {product.description}
-            </p>
-          </section>
         </div>
       </div>
 
       {related.length > 0 && (
-        <section aria-labelledby="relacionados" className="flex flex-col gap-6">
+        <section
+          aria-labelledby="relacionados"
+          className="mt-20 flex flex-col gap-10"
+        >
           <h2
             id="relacionados"
-            className="text-2xl font-semibold tracking-tight"
+            className="text-center text-base display-caps tracking-[0.15em]"
           >
-            También te puede gustar
+            Te puede gustar
           </h2>
           <ProductGrid products={related} headingLevel="h3" />
         </section>
@@ -179,11 +172,11 @@ async function ProductDetail({
 function ProductSkeleton() {
   return (
     <div
-      className="grid gap-10 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-16"
+      className="grid gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,3fr)] lg:gap-14"
       role="status"
       aria-label="Cargando producto"
     >
-      <Skeleton className="aspect-3/4 w-full rounded-md" />
+      <Skeleton className="aspect-3/4 w-full" />
       <div className="flex flex-col gap-4">
         <Skeleton className="h-3 w-24" />
         <Skeleton className="h-9 w-3/4" />

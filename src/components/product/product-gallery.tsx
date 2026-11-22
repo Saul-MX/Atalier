@@ -45,7 +45,7 @@ export function ProductGallery({
     total > 1 ? `${productName}, imagen ${i + 1} de ${total}` : productName;
 
   return (
-    <div className="flex flex-col gap-3 md:flex-row-reverse">
+    <div className="flex flex-col gap-3">
       <div className="relative aspect-[3/4] flex-1 overflow-hidden rounded-md bg-muted">
         <ProductImage
           src={current.url}
@@ -66,9 +66,9 @@ export function ProductGallery({
       </div>
 
       {total > 1 && (
-        <ul aria-label="Miniaturas" className="flex gap-2 md:w-20 md:flex-col">
+        <ul aria-label="Miniaturas" className="grid grid-cols-4 gap-3">
           {images.map((image, i) => (
-            <li key={image.id} className="w-16 md:w-full">
+            <li key={image.id}>
               <button
                 type="button"
                 onClick={() => setIndex(i)}
@@ -79,7 +79,11 @@ export function ProductGallery({
                   i === index && "border-primary",
                 )}
               >
-                <ProductImage src={image.url} alt="" sizes="80px" />
+                <ProductImage
+                  src={image.url}
+                  alt=""
+                  sizes="(min-width: 1024px) 15vw, 25vw"
+                />
               </button>
             </li>
           ))}
