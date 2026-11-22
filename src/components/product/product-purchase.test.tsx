@@ -144,6 +144,31 @@ describe("ProductPurchase", () => {
     ).toBeVisible();
   });
 
+  it("los otros colores del modelo son enlaces a su producto", () => {
+    render(
+      <ProductPurchase
+        product={{
+          ...product,
+          siblings: [
+            {
+              slug: "abrigo-lana-gris",
+              name: "Abrigo de lana gris",
+              color: "Gris",
+              hex: "#888888",
+              available: true,
+            },
+          ],
+        }}
+      />,
+    );
+
+    const color = screen.getByRole("group", { name: /color/i });
+    expect(within(color).getAllByRole("radio")).toHaveLength(2);
+    expect(
+      within(color).getByRole("link", { name: "Ver en Gris" }),
+    ).toHaveAttribute("href", "/producto/abrigo-lana-gris");
+  });
+
   it("muestra el producto como agotado si no hay stock", () => {
     render(
       <ProductPurchase

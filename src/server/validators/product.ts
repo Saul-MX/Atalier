@@ -62,6 +62,13 @@ export const productFormSchema = z
       .max(2000, "Máximo 2000 caracteres."),
     price: priceSchema,
     categoryId: z.string().trim().min(1, "Elige una categoría."),
+    // Opcional: los productos con el mismo modelo son el mismo artículo en
+    // otro color (la ficha enlaza sus colores).
+    model: z
+      .string()
+      .trim()
+      .max(80, "Máximo 80 caracteres.")
+      .transform((value) => value || null),
     active: z.preprocess(
       (value) => value === "on" || value === "true",
       z.boolean(),
@@ -83,6 +90,7 @@ export function parseProductForm(formData: FormData) {
     description: formData.get("description") ?? "",
     price: formData.get("price") ?? "",
     categoryId: formData.get("categoryId") ?? "",
+    model: formData.get("model") ?? "",
     active: formData.get("active"),
   });
 }

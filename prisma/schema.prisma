@@ -39,6 +39,7 @@ model Product {
   description String
   basePrice   Int // centavos MXN
   active      Boolean          @default(true)
+  model       String? // agrupa los productos que son el mismo artículo en otro color
   categoryId  String
   category    Category         @relation(fields: [categoryId], references: [id])
   images      ProductImage[]
@@ -48,6 +49,7 @@ model Product {
 
   @@index([categoryId])
   @@index([active, createdAt])
+  @@index([model])
 }
 
 model ProductImage {

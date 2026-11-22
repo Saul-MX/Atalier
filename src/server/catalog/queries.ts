@@ -6,12 +6,14 @@ import { type Prisma } from "@/generated/prisma/client";
 import { type CatalogFilters, PAGE_SIZE } from "@/lib/catalog/filters";
 import { imagesForColor } from "@/lib/catalog/product-images";
 import { compareSizes } from "@/lib/catalog/sizes";
+import { withLeadColor } from "@/lib/catalog/variants";
 import {
   type CatalogFacets,
   type CatalogPageData,
   type CategoryHighlight,
   type CategorySummary,
   type ColorSwatch,
+  type ModelSibling,
   type ProductCardData,
   type ProductDetailData,
   type SearchResult,
@@ -262,6 +264,7 @@ export async function getProductBySlug(
       name: true,
       description: true,
       basePrice: true,
+      model: true,
       category: { select: { name: true, slug: true } },
       images: {
         orderBy: imageOrder,
@@ -281,8 +284,52 @@ export async function getProductBySlug(
   });
   if (!product) return null;
 
-  const { basePrice, ...rest } = product;
-  return { ...rest, price: basePrice };
+  const { basePrice, model, ...rest } = product;
+  const siblings = model
+    ? await getModelSiblings(model, product.id, product.variants)
+    : [];
+  return { ...rest, price: basePrice, siblings };
+}
+
+/**
+ * Los demás productos activos del mismo modelo, uno por muestra de color: el
+ * color de su foto principal (o su primer color). Se omiten colores que el
+ * producto actual ya tiene.
+ */
+async function getModelSiblings(
+  model: string,
+  productId: string,
+  ownVariants: { color: string }[],
+): Promise<ModelSibling[]> {
+  const rows = await prisma.product.findMany({
+    where: { model, active: true, id: { not: productId } },
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+    select: {
+      slug: true,
+      name: true,
+      images: { orderBy: imageOrder, take: 1, select: { color: true } },
+      variants: {
+        orderBy: { id: "asc" },
+        select: { color: true, colorHex: true, stock: true },
+      },
+    },
+  });
+
+  const taken = new Set(ownVariants.map((variant) => variant.color));
+  const siblings: ModelSibling[] = [];
+  for (const row of rows) {
+    const [lead] = withLeadColor(row.variants, row.images[0]?.color);
+    if (!lead || taken.has(lead.color)) continue;
+    taken.add(lead.color);
+    siblings.push({
+      slug: row.slug,
+      name: row.name,
+      color: lead.color,
+      hex: lead.colorHex,
+      available: row.variants.some((variant) => variant.stock > 0),
+    });
+  }
+  return siblings;
 }
 
 /** Slugs activos, para pre-renderizar las fichas en el build. */

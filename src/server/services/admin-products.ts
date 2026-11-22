@@ -129,10 +129,22 @@ export type AdminProduct = {
   price: number;
   categoryId: string;
   active: boolean;
+  model: string | null;
   images: AdminProductImage[];
   variants: AdminVariant[];
   hasOrders: boolean;
 };
+
+/** Modelos ya usados, para sugerirlos al escribir (agrupan colores). */
+export async function getModelOptions(): Promise<string[]> {
+  const rows = await prisma.product.findMany({
+    where: { model: { not: null } },
+    distinct: ["model"],
+    select: { model: true },
+    orderBy: { model: "asc" },
+  });
+  return rows.flatMap((row) => (row.model ? [row.model] : []));
+}
 
 export async function getAdminProduct(
   id: string,
@@ -148,6 +160,7 @@ export async function getAdminProduct(
         basePrice: true,
         categoryId: true,
         active: true,
+        model: true,
         images: {
           orderBy: [{ position: "asc" }, { id: "asc" }],
           select: {
@@ -214,6 +227,7 @@ function productData(data: ProductFormData) {
     basePrice: data.price,
     categoryId: data.categoryId,
     active: data.active,
+    model: data.model,
   };
 }
 

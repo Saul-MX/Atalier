@@ -1,7 +1,14 @@
 "use client";
 
 import { Loader2Icon } from "lucide-react";
-import { useActionState, useEffect, useId, useRef, useState } from "react";
+import {
+  startTransition,
+  useActionState,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import { toast } from "sonner";
 
 import {
@@ -24,11 +31,14 @@ export type ProductFormValues = {
   price: number;
   categoryId: string;
   active: boolean;
+  model: string | null;
 };
 
 type ProductFormProps = {
   product?: ProductFormValues;
   categories: { id: string; name: string }[];
+  /** Modelos existentes, sugeridos al escribir. */
+  models: string[];
 };
 
 const errorText = "text-xs text-destructive";
@@ -38,7 +48,7 @@ const errorText = "text-xs text-destructive";
  * escrito si el servidor devuelve errores. La validación real es la del
  * servidor (Zod): aquí solo se pintan sus mensajes.
  */
-export function ProductForm({ product, categories }: ProductFormProps) {
+export function ProductForm({ product, categories, models }: ProductFormProps) {
   const id = useId();
   const formRef = useRef<HTMLFormElement>(null);
   const [state, formAction, pending] = useActionState<
@@ -56,6 +66,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
   );
   const [categoryId, setCategoryId] = useState(product?.categoryId ?? "");
   const [active, setActive] = useState(product?.active ?? false);
+  const [model, setModel] = useState(product?.model ?? "");
 
   const errors = state && !state.ok ? (state.fieldErrors ?? {}) : {};
 
@@ -79,7 +90,15 @@ export function ProductForm({ product, categories }: ProductFormProps) {
   return (
     <form
       ref={formRef}
-      action={formAction}
+      // Envío manual en vez de `action={formAction}`: con `action`, React
+      // reinicia el formulario al terminar y el <select> de categoría (controlado)
+      // se quedaba mostrando la primera opción; al guardar otra vez, el
+      // producto cambiaba de categoría.
+      onSubmit={(event) => {
+        event.preventDefault();
+        const data = new FormData(event.currentTarget);
+        startTransition(() => formAction(data));
+      }}
       noValidate
       className="flex flex-col gap-5"
     >
@@ -176,6 +195,26 @@ export function ProductForm({ product, categories }: ProductFormProps) {
             </p>
           )}
         </div>
+      </div>
+
+      <div>
+        <FormField
+          id={`${id}-model`}
+          name="model"
+          label="Modelo (opcional)"
+          maxLength={80}
+          list={`${id}-models`}
+          placeholder="Playera Boxy Heavyweight"
+          value={model}
+          onChange={(event) => setModel(event.target.value)}
+          hint="Si vendes el mismo artículo en otro color como un producto aparte, escribe el mismo modelo en ambos: la ficha mostrará sus colores y enlazará uno con otro."
+          error={errors.model}
+        />
+        <datalist id={`${id}-models`}>
+          {models.map((option) => (
+            <option key={option} value={option} />
+          ))}
+        </datalist>
       </div>
 
       <div className="flex items-start gap-3 rounded-lg border p-4">

@@ -16,6 +16,7 @@ import {
   type AdminProduct,
   getAdminProduct,
   getCategoryOptions,
+  getModelOptions,
 } from "@/server/services/admin-products";
 
 export const metadata: Metadata = { title: "Editar producto" };
@@ -47,9 +48,10 @@ async function EditProduct({
   const { id } = await params;
   await requireAdminPage(`/admin/productos/${id}`);
 
-  const [product, categories, query] = await Promise.all([
+  const [product, categories, models, query] = await Promise.all([
     getAdminProduct(id),
     getCategoryOptions(),
+    getModelOptions(),
     searchParams,
   ]);
 
@@ -135,6 +137,7 @@ async function EditProduct({
       >
         <ProductForm
           categories={categories}
+          models={models}
           product={{
             id: product.id,
             name: product.name,
@@ -143,6 +146,7 @@ async function EditProduct({
             price: product.price,
             categoryId: product.categoryId,
             active: product.active,
+            model: product.model,
           }}
         />
       </Section>

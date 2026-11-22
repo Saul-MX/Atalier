@@ -154,6 +154,7 @@ async function ProductDetail({
                 price: product.price,
                 images: product.images,
                 variants,
+                siblings: product.siblings,
               }}
             />
           </div>

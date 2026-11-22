@@ -6,7 +6,10 @@ import { Suspense } from "react";
 import { ProductForm } from "@/components/admin/product-form";
 import { Skeleton } from "@/components/ui/skeleton";
 import { requireAdminPage } from "@/server/auth/guards";
-import { getCategoryOptions } from "@/server/services/admin-products";
+import {
+  getCategoryOptions,
+  getModelOptions,
+} from "@/server/services/admin-products";
 
 export const metadata: Metadata = { title: "Nuevo producto" };
 
@@ -38,6 +41,9 @@ export default function NewProductPage() {
 
 async function NewProduct() {
   await requireAdminPage("/admin/productos/nuevo");
-  const categories = await getCategoryOptions();
-  return <ProductForm categories={categories} />;
+  const [categories, models] = await Promise.all([
+    getCategoryOptions(),
+    getModelOptions(),
+  ]);
+  return <ProductForm categories={categories} models={models} />;
 }

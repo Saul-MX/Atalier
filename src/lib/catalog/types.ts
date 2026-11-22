@@ -28,6 +28,16 @@ export type ProductDetailData = {
   /** `color: null` = foto válida para todos los colores. */
   images: { id: string; url: string; color: string | null }[];
   variants: VariantOption[];
+  /** El mismo modelo en otros colores (cada uno es su propio producto). */
+  siblings: ModelSibling[];
+};
+
+export type ModelSibling = {
+  slug: string;
+  name: string;
+  color: string;
+  hex: string | null;
+  available: boolean;
 };
 
 export type CatalogPageData = {

@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useId, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { imagesForColor } from "@/lib/catalog/product-images";
+import { type ModelSibling } from "@/lib/catalog/types";
 import {
   colorOptions,
   defaultColor,
@@ -31,6 +33,8 @@ export type PurchaseProduct = {
   /** Para la miniatura del carrito: la primera foto del color elegido. */
   images: { url: string; color: string | null }[];
   variants: VariantOption[];
+  /** El mismo modelo en otros colores: sus muestras enlazan a ese producto. */
+  siblings?: ModelSibling[];
 };
 
 /** Selector de variantes dependiente (color → tallas con stock) + añadir al carrito. */
@@ -150,6 +154,35 @@ export function ProductPurchase({ product }: { product: PurchaseProduct }) {
               </div>
             );
           })}
+          {product.siblings?.map((sibling) => (
+            <Link
+              key={sibling.slug}
+              href={`/producto/${sibling.slug}`}
+              title={
+                sibling.available ? sibling.color : `${sibling.color} (agotado)`
+              }
+              className={cn(
+                "relative flex size-8 items-center justify-center rounded-full border border-transparent p-0.5 hover:border-foreground/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+                !sibling.available && "opacity-60",
+              )}
+            >
+              <span
+                aria-hidden="true"
+                className="size-full rounded-full border border-foreground/20"
+                style={{ backgroundColor: sibling.hex ?? undefined }}
+              />
+              {!sibling.available && (
+                <span
+                  aria-hidden="true"
+                  className="absolute h-px w-8 rotate-45 bg-foreground/60"
+                />
+              )}
+              <span className="sr-only">
+                Ver en {sibling.color}
+                {!sibling.available && ", agotado"}
+              </span>
+            </Link>
+          ))}
         </div>
       </fieldset>
 

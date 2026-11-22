@@ -29,8 +29,18 @@ describe("parseProductForm", () => {
       ...valid,
       slug: "abrigo-de-lana-cruzado",
       price: 489900,
+      model: null,
       active: true,
     });
+  });
+
+  it("el modelo es opcional y se recorta", () => {
+    const result = parseProductForm(
+      form({ ...valid, model: "  Playera Boxy Heavyweight " }),
+    );
+    expect(result.success && result.data.model).toBe(
+      "Playera Boxy Heavyweight",
+    );
   });
 
   it("un checkbox sin marcar es active = false", () => {
