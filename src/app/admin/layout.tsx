@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { AdminNav } from "@/components/admin/admin-nav";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { signInHref } from "@/lib/safe-redirect";
@@ -42,9 +43,10 @@ export default function AdminLayout({ children }: LayoutProps<"/admin">) {
           <div className="hidden sm:block">
             <AdminNav />
           </div>
+          <ThemeToggle className="ml-auto" />
           <Link
             href="/"
-            className="ml-auto text-sm text-muted-foreground hover:text-foreground"
+            className="text-sm text-muted-foreground hover:text-foreground"
           >
             Ver tienda
           </Link>

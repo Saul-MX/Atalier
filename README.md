@@ -25,10 +25,12 @@ El reto técnico central es **no vender nunca más unidades de las que hay**, au
 - Carrito persistente con barra de envío gratis (desde $1,500 MXN).
 - Pago con Stripe Checkout, página de confirmación que espera al webhook y vacía el carrito.
 - Cuentas con correo y contraseña o Google, e historial de pedidos con su estado de envío.
+- Modo claro y oscuro (sigue al sistema hasta que eliges uno) y animaciones ligeras en la portada que respetan «reducir movimiento».
 
 **Panel de administración** (rol `admin`)
 
 - Productos: alta, edición y borrado; fotos con arrastrar y soltar subidas directamente a Cloudinary; matriz de variantes talla × color con su stock.
+- Portada: imagen del hero y de la tarjeta de cada categoría, subidas a Cloudinary desde el panel.
 - Pedidos: filtros por estado, búsqueda, detalle y avance del envío (Pagado → Enviado → Entregado).
 - Métricas: ingresos de 30 días frente al periodo anterior, ticket medio, pedidos por enviar, stock bajo y gráfica de ventas diarias accesible con teclado.
 
@@ -167,7 +169,7 @@ erDiagram
 
 Lighthouse 13 contra la demo publicada, mediana de 5 ejecuciones en móvil. \*En el catálogo los metadatos dependen de la URL y Next 16 los envía en streaming a los navegadores; los rastreadores que no ejecutan JavaScript (Bing, redes sociales) los reciben en el `<head>`.
 
-- **Tests:** 243 unitarios y de componentes (Vitest) y 27 de integración contra PostgreSQL real en Docker: concurrencia de stock, webhook duplicado y concurrente, expiración y cron, y fotos por color.
+- **Tests:** 245 unitarios y de componentes (Vitest) y 31 de integración contra PostgreSQL real en Docker: concurrencia de stock, webhook duplicado y concurrente, expiración y cron, fotos por color e imágenes de la portada.
 - **Accesibilidad:** auditoría con axe-core (WCAG 2.1 AA) de 36 páginas y estados, incluido el panel, en escritorio y móvil: 0 infracciones. Navegación completa con teclado, foco visible y devuelto al cerrar diálogos, y estados nunca indicados solo con color.
 - **Rendimiento:** el JavaScript inicial se redujo al sacar Zod del cliente y cargar los diálogos (búsqueda, menú, carrito) bajo demanda; las imágenes candidatas a LCP se piden con prioridad alta. Se probó `inlineCss` y se descartó porque empeoraba el primer pintado.
 - **SEO:** metadatos y Open Graph por página, datos estructurados `Product` y `WebSite`, `sitemap.xml`, `robots.txt`, y `noindex` en búsquedas y combinaciones de filtros.

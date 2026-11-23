@@ -167,19 +167,20 @@ export const variantMatrixSchema = z
 
 export type VariantMatrixData = z.infer<typeof variantMatrixSchema>;
 
+/** Respuesta de Cloudinary a una subida firmada (se verifica en el servidor). */
+export const uploadedImageSchema = z.object({
+  publicId: z.string().min(1).max(255),
+  version: z.number().int().positive(),
+  signature: z.string().regex(/^[a-f0-9]{40,64}$/i),
+  format: z.enum(UPLOAD_FORMATS),
+});
+
 export const uploadedImagesSchema = z
-  .array(
-    z.object({
-      publicId: z.string().min(1).max(255),
-      version: z.number().int().positive(),
-      signature: z.string().regex(/^[a-f0-9]{40,64}$/i),
-      format: z.enum(UPLOAD_FORMATS),
-    }),
-  )
+  .array(uploadedImageSchema)
   .min(1)
   .max(MAX_PRODUCT_IMAGES);
 
-export type UploadedImage = z.infer<typeof uploadedImagesSchema>[number];
+export type UploadedImage = z.infer<typeof uploadedImageSchema>;
 
 /** Nombre de un color de variante (al renombrarlo). */
 export const colorNameSchema = z

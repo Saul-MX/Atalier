@@ -3,6 +3,7 @@ import Link from "next/link";
 import { UserMenu } from "@/components/auth/user-menu";
 import { CartButton } from "@/components/cart/cart-button";
 import { Container } from "@/components/shared/container";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { catalogHref } from "@/lib/catalog/filters";
 import { getCategories } from "@/server/catalog/queries";
 
@@ -45,6 +46,8 @@ export async function SiteHeader() {
           <SearchLauncher />
           <UserMenu />
           <CartButton />
+          {/* En móvil el interruptor está en el menú (no cabe otro icono). */}
+          <ThemeToggle className="hidden lg:inline-flex" />
         </div>
       </Container>
     </header>

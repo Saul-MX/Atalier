@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Inter } from "next/font/google";
 
+import { ThemeProvider } from "@/components/theme/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { publicEnv } from "@/lib/env/public";
 import { openGraphBase, SITE } from "@/lib/seo";
@@ -39,10 +40,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="es-MX"
       className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
+      // next-themes añade la clase del tema antes de hidratar.
+      suppressHydrationWarning
     >
       <body className="flex min-h-full flex-col">
-        {children}
-        <Toaster />
+        <ThemeProvider>
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

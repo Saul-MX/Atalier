@@ -25,11 +25,22 @@ enum OrderStatus {
 }
 
 model Category {
-  id       String    @id @default(cuid())
-  name     String
-  slug     String    @unique
-  position Int       @default(0) // orden en la navegación
-  products Product[]
+  id            String    @id @default(cuid())
+  name          String
+  slug          String    @unique
+  position      Int       @default(0) // orden en la navegación
+  // Foto de su tarjeta en la portada (Cloudinary). Sin ella se usa la de un producto.
+  imageUrl      String?
+  imagePublicId String?
+  products      Product[]
+}
+
+/// Imágenes editables de la portada, por clave (hoy solo "hero").
+model SiteImage {
+  key       String   @id
+  url       String
+  publicId  String // id de Cloudinary, necesario para borrar
+  updatedAt DateTime @updatedAt
 }
 
 model Product {

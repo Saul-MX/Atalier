@@ -24,6 +24,11 @@ import { serverEnv } from "@/lib/env/server";
 export const productFolder = (productId: string) =>
   `atelier/products/${productId}`;
 
+/** Imágenes de la portada: el hero y la tarjeta de cada categoría. */
+export const heroFolder = "atelier/site/hero";
+export const categoryFolder = (categoryId: string) =>
+  `atelier/site/categories/${categoryId}`;
+
 let configured = false;
 function client() {
   if (!configured) {
@@ -49,9 +54,17 @@ export type UploadSignature = {
 
 /** Firma válida ~1 h (Cloudinary rechaza timestamps más antiguos). */
 export function signProductUpload(productId: string): UploadSignature {
+  return signUpload(productFolder(productId));
+}
+
+/**
+ * Firma una subida limitada a `folder` y a formatos raster. El servidor
+ * comprueba después que el public_id devuelto empiece por esa carpeta.
+ */
+export function signUpload(folder: string): UploadSignature {
   const params = {
     timestamp: Math.round(Date.now() / 1000),
-    folder: productFolder(productId),
+    folder,
     allowed_formats: UPLOAD_FORMATS.join(","),
   };
   const signature = client().utils.api_sign_request(

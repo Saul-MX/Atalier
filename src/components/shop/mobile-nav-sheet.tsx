@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useId } from "react";
 
+import { useDarkMode } from "@/components/theme/use-dark-mode";
+import { Label } from "@/components/ui/label";
 import {
   Sheet,
   SheetContent,
@@ -9,8 +12,23 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Switch } from "@/components/ui/switch";
 import { catalogHref } from "@/lib/catalog/filters-url";
 import { type CategorySummary } from "@/lib/catalog/types";
+
+/** Interruptor del modo oscuro al pie del menú móvil. */
+function DarkModeSwitch() {
+  const id = useId();
+  const { isDark, setDark } = useDarkMode();
+  return (
+    <div className="mt-auto flex items-center justify-between border-t px-4 py-4">
+      <Label htmlFor={id} className="text-base font-normal">
+        Modo oscuro
+      </Label>
+      <Switch id={id} checked={isDark ?? false} onCheckedChange={setDark} />
+    </div>
+  );
+}
 
 /** Panel del menú móvil (carga diferida desde MobileNav). */
 export function MobileNavSheet({
@@ -67,6 +85,7 @@ export function MobileNavSheet({
             ))}
           </ul>
         </nav>
+        <DarkModeSwitch />
       </SheetContent>
     </Sheet>
   );

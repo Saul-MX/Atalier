@@ -19,6 +19,7 @@ import {
   type SearchResult,
 } from "@/lib/catalog/types";
 import { prisma } from "@/lib/prisma";
+import { HERO_KEY } from "@/lib/site-images";
 
 /**
  * Lecturas públicas del catálogo, cacheadas con `use cache`.
@@ -106,9 +107,10 @@ export async function getCategoryHighlights(): Promise<CategoryHighlight[]> {
     select: {
       name: true,
       slug: true,
+      // Imagen subida desde el admin («Portada»); si no hay, la de su producto
+      // más antiguo, para no repetir las de «Novedades» en la home.
+      imageUrl: true,
       _count: { select: { products: { where: { active: true } } } },
-      // La imagen de la categoría es su producto más antiguo, para no repetir
-      // las de "Novedades" en la home.
       products: {
         where: { active: true },
         orderBy: { createdAt: "asc" },
@@ -126,8 +128,21 @@ export async function getCategoryHighlights(): Promise<CategoryHighlight[]> {
       name: c.name,
       slug: c.slug,
       productCount: c._count.products,
-      image: c.products[0]?.images[0]?.url ?? null,
+      image: c.imageUrl ?? c.products[0]?.images[0]?.url ?? null,
     }));
+}
+
+/** Imagen del hero de la portada (subida desde «Portada»), o null. */
+export async function getHeroImage(): Promise<string | null> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(CATALOG_TAG);
+
+  const hero = await prisma.siteImage.findUnique({
+    where: { key: HERO_KEY },
+    select: { url: true },
+  });
+  return hero?.url ?? null;
 }
 
 export async function getNewArrivals(limit = 8): Promise<ProductCardData[]> {
